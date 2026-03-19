@@ -1,8 +1,8 @@
 import 'package:googleapis/calendar/v3.dart' as calendar;
-import 'package:googleapis_auth/googleapis_auth.dart' as auth;
+import 'package:googleapis_auth/googleapis_auth/googleapis_auth.dart' as auth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'package:estudio_forge/core/auth/google_auth_service.dart';
+import 'package:la_facu/core/services/google_calendar_service.dart';
+import 'package:la_facu/features/subjects/data/subject_repository.dart';
 
 // Provider para la API de Calendario
 final calendarApiProvider = FutureProvider<calendar.CalendarApi?>((ref) async {

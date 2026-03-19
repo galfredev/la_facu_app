@@ -1,11 +1,11 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(estudio_forge LANGUAGES CXX)
+project(la_facu LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "estudio_forge")
-
+set(BINARY_NAME "la_facu")
+set(APPLICATION_ID "com.estudioforge.lafacu")
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.
 cmake_policy(VERSION 3.14...3.25)
