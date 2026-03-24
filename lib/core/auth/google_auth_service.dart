@@ -154,10 +154,12 @@ class GoogleAuth extends _$GoogleAuth {
       },
     );
 
-    debugPrint('OAuth URL: ${authUrl.toString()}');
-    await Clipboard.setData(ClipboardData(text: authUrl.toString()));
+    final authUrlString = authUrl.toString();
+    debugPrint('OAuth URL: $authUrlString');
+    await _setLastAuthFailure('oauth_url: $authUrlString');
+    await Clipboard.setData(ClipboardData(text: authUrlString));
 
-    if (!await _openBrowser(authUrl.toString())) {
+    if (!await _openBrowser(authUrlString)) {
       debugPrint(
         'No se pudo abrir el navegador automaticamente. La URL esta en el portapapeles.',
       );
@@ -427,7 +429,7 @@ class GoogleAuth extends _$GoogleAuth {
 Future<bool> _openBrowser(String url) async {
   try {
     if (Platform.isWindows) {
-      await Process.start('rundll32.exe', ['url.dll,FileProtocolHandler', url]);
+      await Process.start('explorer.exe', [url]);
       return true;
     }
 
