@@ -38,9 +38,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
   }
 
   Future<void> _pickImage() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.image,
-    );
+    final result = await FilePicker.platform.pickFiles(type: FileType.image);
 
     if (result != null && result.files.single.path != null) {
       setState(() {
@@ -56,7 +54,10 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     return AlertDialog(
       backgroundColor: surfaceColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text('Editar Perfil', style: Theme.of(context).textTheme.titleLarge),
+      title: Text(
+        'Editar Perfil',
+        style: Theme.of(context).textTheme.titleLarge,
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -76,7 +77,13 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                     clipBehavior: Clip.antiAlias,
                     child: _photoPath != null
                         ? Image.file(File(_photoPath!), fit: BoxFit.cover)
-                        : const Center(child: Icon(Icons.person_rounded, size: 50, color: AppColors.primaryBlue)),
+                        : const Center(
+                            child: Icon(
+                              Icons.person_rounded,
+                              size: 50,
+                              color: AppColors.primaryBlue,
+                            ),
+                          ),
                   ),
                   Container(
                     padding: const EdgeInsets.all(6),
@@ -84,30 +91,56 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                       color: AppColors.primaryBlue,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            _buildField(label: 'Nombre', controller: _nameController, icon: Icons.person_outline_rounded),
-            _buildField(label: 'Descripción / Bio', controller: _bioController, icon: Icons.info_outline_rounded, maxLines: 2),
-            _buildField(label: 'Universidad', controller: _uniController, icon: Icons.account_balance_rounded),
-            _buildField(label: 'Carrera', controller: _careerController, icon: Icons.school_outlined),
+            _buildField(
+              label: 'Nombre',
+              controller: _nameController,
+              icon: Icons.person_outline_rounded,
+            ),
+            _buildField(
+              label: 'Descripción / Bio',
+              controller: _bioController,
+              icon: Icons.info_outline_rounded,
+              maxLines: 2,
+            ),
+            _buildField(
+              label: 'Universidad',
+              controller: _uniController,
+              icon: Icons.account_balance_rounded,
+            ),
+            _buildField(
+              label: 'Carrera',
+              controller: _careerController,
+              icon: Icons.school_outlined,
+            ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
         ElevatedButton(
           onPressed: () async {
-            await ref.read(userRepositoryProvider.notifier).updateProfile(
-              name: _nameController.text,
-              bio: _bioController.text,
-              university: _uniController.text,
-              career: _careerController.text,
-              photoPath: _photoPath,
-            );
+            await ref
+                .read(userRepositoryProvider.notifier)
+                .updateProfile(
+                  name: _nameController.text,
+                  bio: _bioController.text,
+                  university: _uniController.text,
+                  career: _careerController.text,
+                  photoPath: _photoPath,
+                );
             if (context.mounted) Navigator.pop(context);
           },
           child: const Text('Guardar'),
@@ -116,7 +149,12 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     );
   }
 
-  Widget _buildField({required String label, required TextEditingController controller, required IconData icon, int maxLines = 1}) {
+  Widget _buildField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    int maxLines = 1,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextField(
@@ -126,7 +164,10 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
           labelText: label,
           prefixIcon: Icon(icon, size: 20),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
         ),
       ),
     );

@@ -44,6 +44,7 @@ class SettingsScreen extends ConsumerWidget {
               userAsync.when(
                 data: (user) => _ProfileCard(
                   user: user,
+                  googleUser: googleUser,
                 ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
                 loading: () => const _ProfileCardLoading(),
                 error: (_, _) => const Text('Error al cargar perfil'),
@@ -57,6 +58,10 @@ class SettingsScreen extends ConsumerWidget {
                       .read(googleAuthProvider.notifier)
                       .login();
                   if (account != null && context.mounted) {
+                    await ref
+                        .read(userRepositoryProvider.notifier)
+                        .syncGoogleProfile(account);
+                    ref.invalidate(userRepositoryProvider);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Conectado como ${account.email}'),
@@ -94,6 +99,10 @@ class SettingsScreen extends ConsumerWidget {
                         if (googleUser == null) {
                           final account = await notifier.login();
                           if (account != null && context.mounted) {
+                            await ref
+                                .read(userRepositoryProvider.notifier)
+                                .syncGoogleProfile(account);
+                            ref.invalidate(userRepositoryProvider);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -379,13 +388,18 @@ class _GoogleConnectionCard extends StatelessWidget {
 
 class _ProfileCard extends StatelessWidget {
   final UserModel? user;
-  const _ProfileCard({required this.user});
+  final UserInfo? googleUser;
+
+  const _ProfileCard({required this.user, required this.googleUser});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final photoPath = user?.photoPath;
     final hasPhoto = photoPath != null && File(photoPath).existsSync();
+    final googlePhoto = googleUser?.photoUrl;
+    final hasGooglePhoto =
+        !hasPhoto && googlePhoto != null && googlePhoto.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -419,9 +433,14 @@ class _ProfileCard extends StatelessWidget {
                       image: FileImage(File(photoPath)),
                       fit: BoxFit.cover,
                     )
+                  : hasGooglePhoto
+                  ? DecorationImage(
+                      image: NetworkImage(googlePhoto),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
-            child: !hasPhoto
+            child: !hasPhoto && !hasGooglePhoto
                 ? const Center(
                     child: Icon(
                       Icons.person_rounded,
@@ -437,7 +456,7 @@ class _ProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  user?.name ?? 'Usuario',
+                  googleUser?.displayName ?? user?.name ?? 'Usuario',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 2),

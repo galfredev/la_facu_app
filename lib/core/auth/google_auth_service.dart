@@ -334,12 +334,12 @@ Future<bool> _openBrowser(String url) async {
 
 String _buildOAuthResponse(bool success) {
   final title = success
-      ? 'Conexion exitosa con Google'
+      ? 'La Facu: mantenete enfocado'
       : 'No pudimos conectar tu cuenta';
   final color = success ? '#34d399' : '#f87171';
   final message = success
-      ? 'Ya podes cerrar esta pestana. La Facu esta actualizando tu espacio con la cuenta conectada.'
-      : 'Volve a la app e intenta de nuevo.';
+      ? 'Ya podés cerrar esta pestaña. Tu cuenta fue verificada exitosamente con Google.'
+      : 'Volvé a la app e intentá de nuevo.';
 
   return '''
 <!DOCTYPE html>
@@ -354,13 +354,13 @@ String _buildOAuthResponse(bool success) {
     <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
       <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #6366f1, #10b981); display:flex; align-items:center; justify-content:center; color:white; font-size:15px; font-weight:800; letter-spacing:1px;">OK</div>
       <div>
-        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8;">La Facu | Google</div>
-        <h2 style="margin:4px 0 0; color:; font-size:28px; line-height:1.1;"></h2>
+        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8;">La Facu: mantenete enfocado</div>
+        <h2 style="margin:4px 0 0; color:$color; font-size:28px; line-height:1.1;">$title</h2>
       </div>
     </div>
-    <p style="margin:0 0 14px; color:#dbe7ff; font-size:16px; line-height:1.6;"></p>
+    <p style="margin:0 0 14px; color:#dbe7ff; font-size:16px; line-height:1.6;">$message</p>
     <div style="padding:14px 16px; border-radius:18px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.16); color:#c7d8ff; font-size:14px;">
-      Si la app ya esta abierta, vas a ver el refresh con tu cuenta conectada en unos segundos.
+      Si la app ya está abierta, vas a ver el refresh con tu cuenta conectada en unos segundos.
     </div>
     <p style="margin:16px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.6px;">GalfreDev</p>
   </div>

@@ -157,6 +157,7 @@ class DashboardScreen extends ConsumerWidget {
                         ),
                         _ProfileAvatar(
                           userAsync: userAsync,
+                          googleUser: googleUser,
                           colorPrimary: colorPrimary,
                           glowColor: glowColor,
                           isDark: isDark,
@@ -472,6 +473,7 @@ class DashboardScreen extends ConsumerWidget {
 // ---- Profile Avatar Widget ----
 class _ProfileAvatar extends StatelessWidget {
   final AsyncValue<UserModel?> userAsync;
+  final UserInfo? googleUser;
   final Color colorPrimary;
   final Color glowColor;
   final bool isDark;
@@ -479,6 +481,7 @@ class _ProfileAvatar extends StatelessWidget {
 
   const _ProfileAvatar({
     required this.userAsync,
+    required this.googleUser,
     required this.colorPrimary,
     required this.glowColor,
     required this.isDark,
@@ -490,6 +493,9 @@ class _ProfileAvatar extends StatelessWidget {
     final hasPhoto =
         userAsync.value?.photoPath != null &&
         File(userAsync.value!.photoPath!).existsSync();
+    final googlePhoto = googleUser?.photoUrl;
+    final hasGooglePhoto =
+        !hasPhoto && googlePhoto != null && googlePhoto.isNotEmpty;
 
     return GestureDetector(
       onTap: () => context.go('/settings'),
@@ -508,6 +514,11 @@ class _ProfileAvatar extends StatelessWidget {
                   image: FileImage(File(userAsync.value!.photoPath!)),
                   fit: BoxFit.cover,
                 )
+              : hasGooglePhoto
+              ? DecorationImage(
+                  image: NetworkImage(googlePhoto),
+                  fit: BoxFit.cover,
+                )
               : null,
           boxShadow: [
             BoxShadow(
@@ -516,7 +527,7 @@ class _ProfileAvatar extends StatelessWidget {
             ),
           ],
         ),
-        child: !hasPhoto
+        child: !hasPhoto && !hasGooglePhoto
             ? Center(
                 child: Text(
                   userName[0],

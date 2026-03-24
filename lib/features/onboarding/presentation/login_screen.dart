@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:la_facu/core/auth/google_auth_service.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
+import 'package:la_facu/features/settings/data/user_repository.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -23,6 +24,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       final account = await ref.read(googleAuthProvider.notifier).login();
       if (account != null && mounted) {
+        await ref
+            .read(userRepositoryProvider.notifier)
+            .syncGoogleProfile(account);
+        ref.invalidate(userRepositoryProvider);
         setState(() => _showSuccess = true);
         await Future.delayed(const Duration(milliseconds: 900));
         if (mounted) {

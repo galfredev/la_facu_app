@@ -1,4 +1,5 @@
 import 'package:isar/isar.dart';
+import 'package:la_facu/core/auth/google_auth_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:la_facu/data/local_db/models/user_model.dart';
 import 'package:la_facu/data/local_db/isar_service.dart';
@@ -27,6 +28,31 @@ class UserRepository extends _$UserRepository {
     return user;
   }
 
+  Future<void> syncGoogleProfile(UserInfo account) async {
+    final isar = await ref.read(isarServiceProvider.future);
+    final user = await build();
+
+    if (user == null) {
+      return;
+    }
+
+    final currentBio = user.bio?.trim() ?? '';
+    final shouldRefreshBio =
+        currentBio.isEmpty ||
+        currentBio ==
+            'Â¡Hola! Estoy usando La Facu para enfocarme en mis estudios.';
+
+    user
+      ..name = account.displayName.isNotEmpty ? account.displayName : user.name
+      ..email = account.email.isNotEmpty ? account.email : user.email
+      ..bio = shouldRefreshBio
+          ? 'Cuenta conectada con Google. Completa tu carrera, universidad y descripcion.'
+          : user.bio;
+
+    await isar.writeTxn(() => isar.userModels.put(user));
+    ref.invalidateSelf();
+  }
+
   Future<void> updateProfile({
     String? name,
     String? bio,
@@ -36,7 +62,7 @@ class UserRepository extends _$UserRepository {
   }) async {
     final isar = await ref.read(isarServiceProvider.future);
     final user = await build();
-    
+
     if (user != null) {
       final updatedUser = user
         ..name = name ?? user.name
@@ -44,7 +70,7 @@ class UserRepository extends _$UserRepository {
         ..university = university ?? user.university
         ..career = career ?? user.career
         ..photoPath = photoPath ?? user.photoPath;
-      
+
       await isar.writeTxn(() => isar.userModels.put(updatedUser));
       ref.invalidateSelf();
     }
@@ -53,7 +79,7 @@ class UserRepository extends _$UserRepository {
   Future<void> toggleNotifications() async {
     final isar = await ref.read(isarServiceProvider.future);
     final user = await build();
-    
+
     if (user != null) {
       user.notificationsEnabled = !user.notificationsEnabled;
       await isar.writeTxn(() => isar.userModels.put(user));
