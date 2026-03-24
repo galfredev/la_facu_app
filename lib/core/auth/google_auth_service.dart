@@ -65,23 +65,12 @@ class GoogleAuth extends _$GoogleAuth {
 
   Future<UserInfo?> _signInDesktop() async {
     try {
-      final authResult = await _getAuthorizationCodeDesktop();
-      if (authResult == null) {
-        return null;
-      }
-
-      final userInfo = await _getUserInfoFromCode(
-        authResult.code,
-        authResult.redirectUri,
-        authResult.codeVerifier,
-      );
-
+      final userInfo = await _authenticateDesktop();
       if (userInfo != null) {
         _currentUser = userInfo;
         state = userInfo;
         await _persistSession(userInfo);
       }
-
       return userInfo;
     } catch (e) {
       debugPrint('Error en autenticacion de escritorio: $e');
@@ -129,7 +118,7 @@ class GoogleAuth extends _$GoogleAuth {
     return null;
   }
 
-  Future<_DesktopAuthResult?> _getAuthorizationCodeDesktop() async {
+  Future<UserInfo?> _authenticateDesktop() async {
     final clientId = _authClientId;
     if (clientId.isEmpty) {
       _warnMissingCredentials();
@@ -172,7 +161,7 @@ class GoogleAuth extends _$GoogleAuth {
       );
     }
 
-    final completer = Completer<_DesktopAuthResult?>();
+    final completer = Completer<UserInfo?>();
 
     unawaited(() async {
       try {
@@ -184,20 +173,25 @@ class GoogleAuth extends _$GoogleAuth {
           }
 
           final code = request.uri.queryParameters['code'];
+          final error = request.uri.queryParameters['error'];
+          UserInfo? userInfo;
+
+          if (code != null) {
+            userInfo = await _getUserInfoFromCode(
+              code,
+              redirectUri,
+              codeVerifier,
+            );
+          } else if (error != null) {
+            debugPrint('Google devolvio un error de OAuth: $error');
+          }
+
           request.response.headers.contentType = ContentType.html;
-          request.response.write(_buildOAuthResponse(code != null));
+          request.response.write(_buildOAuthResponse(userInfo != null));
           await request.response.close();
 
           if (!completer.isCompleted) {
-            completer.complete(
-              code == null
-                  ? null
-                  : _DesktopAuthResult(
-                      code: code,
-                      redirectUri: redirectUri,
-                      codeVerifier: codeVerifier,
-                    ),
-            );
+            completer.complete(userInfo);
           }
 
           await server.close(force: true);
@@ -429,11 +423,11 @@ Future<bool> _openBrowser(String url) async {
 
 String _buildOAuthResponse(bool success) {
   final title = success
-      ? 'Ya podes cerrar esta pestana'
+      ? 'Verificacion completada'
       : 'No pudimos verificar tu cuenta';
-  final accent = success ? '#6366f1' : '#fb7185';
+  final accent = success ? '#10b981' : '#fb7185';
   final message = success
-      ? 'La conexion con Google se completo correctamente. La app va a refrescar tu cuenta automaticamente.'
+      ? 'La verificacion con Google se realizo correctamente. Ya podes cerrar esta pestana y volver a la app.'
       : 'Volve a la app e intenta de nuevo.';
 
   return '''
@@ -444,17 +438,16 @@ String _buildOAuthResponse(bool success) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Facu</title>
 </head>
-<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.38), transparent 28%), radial-gradient(circle at bottom left, rgba(16,185,129,0.18), transparent 22%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
-  <div style="width:min(500px, calc(100vw - 32px)); padding:40px 32px; border-radius:32px; background:rgba(15,23,42,0.86); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(16px); text-align:center;">
-    <div style="width:74px; height:74px; margin:0 auto 22px; border-radius:24px; background:linear-gradient(135deg, rgba(99,102,241,0.95), rgba(16,185,129,0.9)); display:flex; align-items:center; justify-content:center; box-shadow:0 18px 38px rgba(99,102,241,0.26);">
-      <div style="width:28px; height:16px; border-left:4px solid white; border-bottom:4px solid white; transform:rotate(-45deg); margin-top:-4px;"></div>
+<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.34), transparent 30%), radial-gradient(circle at bottom left, rgba(16,185,129,0.15), transparent 24%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
+  <div style="width:min(480px, calc(100vw - 32px)); padding:42px 30px 34px; border-radius:32px; background:rgba(15,23,42,0.88); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.16); backdrop-filter: blur(16px); text-align:center;">
+    <div style="width:72px; height:72px; margin:0 auto 22px; border-radius:24px; background:linear-gradient(135deg, rgba(99,102,241,0.95), rgba(16,185,129,0.9)); display:flex; align-items:center; justify-content:center; box-shadow:0 18px 38px rgba(99,102,241,0.24);">
+      <div style="width:26px; height:15px; border-left:4px solid white; border-bottom:4px solid white; transform:rotate(-45deg); margin-top:-4px;"></div>
     </div>
-    <div style="font-size:11px; text-transform:uppercase; letter-spacing:4px; color:#94a3b8;">LA FACU</div>
-    <h1 style="margin:14px 0 0; color:#f8fafc; font-size:38px; line-height:1; font-weight:800; letter-spacing:-1px;">mantenete enfocado</h1>
-    <p style="margin:18px 0 0; color:#f8fafc; font-size:21px; font-weight:700; line-height:1.3;">$title</p>
-    <p style="margin:14px auto 0; max-width:360px; color:#c7d8ff; font-size:15px; line-height:1.7;">$message</p>
-    <div style="display:inline-flex; margin-top:18px; padding:10px 14px; border-radius:999px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.18); color:$accent; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase;">Google verificado</div>
-    <p style="margin:22px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.4px;">GalfreDev</p>
+    <h1 style="margin:0; color:#f8fafc; font-size:20px; line-height:1.2; font-weight:700; letter-spacing:0;">La Facu</h1>
+    <p style="margin:6px 0 0; color:#10b981; font-size:12px; font-weight:700; letter-spacing:2.6px; text-transform:uppercase;">ESTUDIANTE ENFOCADO</p>
+    <p style="margin:26px 0 0; color:#f8fafc; font-size:22px; font-weight:700; line-height:1.3;">$title</p>
+    <p style="margin:12px auto 0; max-width:340px; color:#c7d8ff; font-size:15px; line-height:1.7;">$message</p>
+    <p style="margin:18px 0 0; color:$accent; font-size:13px; font-weight:600;">Google</p>
   </div>
   <script>
     setTimeout(() => window.close(), 2200);
@@ -488,16 +481,4 @@ Future<String?> _waitForCode({required Duration duration}) async {
     }
   });
   return completer.future;
-}
-
-class _DesktopAuthResult {
-  const _DesktopAuthResult({
-    required this.code,
-    required this.redirectUri,
-    required this.codeVerifier,
-  });
-
-  final String code;
-  final String redirectUri;
-  final String codeVerifier;
 }
