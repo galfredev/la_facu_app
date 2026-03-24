@@ -157,9 +157,8 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       );
                       if (confirm == true) {
-                        final isar = await ref.read(isarServiceProvider.future);
-                        final tasks = await isar.taskModels.where().findAll();
-                        final events = await isar.classEventModels.where().findAll();
+                        final tasks = await ref.read(taskRepositoryProvider.future);
+                        final events = await ref.read(scheduleRepositoryProvider.future);
 
                         for (final task in tasks) {
                           await ref.read(

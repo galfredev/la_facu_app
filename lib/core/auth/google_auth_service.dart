@@ -12,6 +12,7 @@ part 'google_auth_service.g.dart';
 @Riverpod(keepAlive: true)
 class GoogleAuth extends _$GoogleAuth {
   UserInfo? _currentUser;
+  bool _hasWarnedMissingCredentials = false;
 
   static const _clientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
   static const _clientSecret = String.fromEnvironment('GOOGLE_CLIENT_SECRET');
@@ -73,7 +74,7 @@ class GoogleAuth extends _$GoogleAuth {
 
   Future<UserInfo?> _authenticateWithGoogle() async {
     if (_clientId.isEmpty || _clientSecret.isEmpty) {
-      debugPrint('Faltan credenciales de Google para autenticacion.');
+      _warnMissingCredentials();
       return null;
     }
 
@@ -110,7 +111,7 @@ class GoogleAuth extends _$GoogleAuth {
 
   Future<_DesktopAuthResult?> _getAuthorizationCodeDesktop() async {
     if (_clientId.isEmpty || _clientSecret.isEmpty) {
-      debugPrint('Faltan credenciales de Google para autenticacion.');
+      _warnMissingCredentials();
       return null;
     }
 
@@ -255,6 +256,15 @@ class GoogleAuth extends _$GoogleAuth {
     }
 
     return {'Authorization': 'Bearer $accessToken'};
+  }
+
+  void _warnMissingCredentials() {
+    if (_hasWarnedMissingCredentials) {
+      return;
+    }
+
+    _hasWarnedMissingCredentials = true;
+    debugPrint('Faltan credenciales de Google para autenticacion.');
   }
 }
 
