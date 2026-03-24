@@ -130,7 +130,7 @@ class GoogleAuth extends _$GoogleAuth {
       0,
       shared: true,
     );
-    final redirectUri = 'http://localhost:${server.port}/callback';
+    final redirectUri = 'http://127.0.0.1:${server.port}/callback';
     final codeVerifier = _generateCodeVerifier();
     final codeChallenge = _codeChallengeS256(codeVerifier);
     final state = DateTime.now().millisecondsSinceEpoch.toString();
