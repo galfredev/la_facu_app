@@ -333,21 +333,35 @@ Future<bool> _openBrowser(String url) async {
 }
 
 String _buildOAuthResponse(bool success) {
-  final title = success ? 'Autenticacion exitosa' : 'Error de autenticacion';
-  final color = success ? '#43a047' : '#e53935';
+  final title = success ? 'Sesión conectada' : 'No pudimos conectar';
+  final color = success ? '#2e7d32' : '#d32f2f';
   final message = success
-      ? 'La aplicacion esta procesando tu informacion...'
-      : 'No pudimos completar la autenticacion.';
+      ? 'Ya podés volver a La Facu. Esta pestaña se puede cerrar.'
+      : 'Volvé a la app e intentá de nuevo.';
 
   return '''
 <!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
-<body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f5f5f5;">
-  <div style="text-align: center; padding: 40px; background: white; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
-    <h2 style="color: $color;">$title</h2>
-    <p>$message</p>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>La Facu</title>
+</head>
+<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f7f9ff 0%,#eef4ff 100%); font-family: Inter, Arial, sans-serif;">
+  <div style="width:min(560px, calc(100vw - 32px)); padding:32px; border-radius:28px; background:rgba(255,255,255,0.92); box-shadow:0 18px 60px rgba(27,78,163,0.12); border:1px solid rgba(46,125,50,0.08);">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #1b74e4, #7fc8a9); display:flex; align-items:center; justify-content:center; color:white; font-size:22px;">✓</div>
+      <div>
+        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#5f6c82;">La Facu · Google</div>
+        <h2 style="margin:4px 0 0; color:$color; font-size:28px; line-height:1.1;">$title</h2>
+      </div>
+    </div>
+    <p style="margin:0 0 10px; color:#304056; font-size:16px; line-height:1.6;">$message</p>
+    <p style="margin:0; color:#6b778c; font-size:13px;">By Galfred Dev</p>
   </div>
+  <script>
+    setTimeout(() => window.close(), 1200);
+  </script>
 </body>
 </html>
 ''';

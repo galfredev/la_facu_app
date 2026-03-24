@@ -15,6 +15,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _showSuccess = false;
+  bool _didAutoRedirect = false;
 
   void _handleLogin() async {
     setState(() => _isLoading = true);
@@ -40,7 +41,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didAutoRedirect) return;
+
+    final account = ref.read(googleAuthProvider);
+    if (account != null) {
+      _didAutoRedirect = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.go('/');
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen<UserInfo?>(googleAuthProvider, (previous, next) {
+      if (next != null && mounted && !_didAutoRedirect) {
+        _didAutoRedirect = true;
+        context.go('/');
+      }
+    });
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
@@ -182,30 +206,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? Container(
                             key: const ValueKey('google-success'),
                             width: double.infinity,
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(18),
                             decoration: BoxDecoration(
-                              color: AppColors.primaryBlue.withValues(
-                                alpha: 0.12,
+                              gradient: LinearGradient(
+                                colors: [
+                                  AppColors.primaryBlue.withValues(alpha: 0.12),
+                                  AppColors.accentSage.withValues(alpha: 0.08),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
                               ),
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(18),
                               border: Border.all(
                                 color: AppColors.primaryBlue.withValues(
-                                  alpha: 0.2,
+                                  alpha: 0.18,
                                 ),
                               ),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.verified_rounded,
-                                  color: AppColors.primaryBlue,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primaryBlue.withValues(
+                                    alpha: 0.08,
+                                  ),
+                                  blurRadius: 18,
+                                  offset: const Offset(0, 8),
                                 ),
-                                SizedBox(width: 12),
-                                Expanded(
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryBlue.withValues(
+                                      alpha: 0.14,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.verified_rounded,
+                                    color: AppColors.primaryBlue,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Expanded(
                                   child: Text(
                                     'Cuenta conectada. Preparando tu espacio personal...',
                                     style: TextStyle(
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
                                     ),
                                   ),
                                 ),
@@ -227,6 +275,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ).animate().fadeIn(delay: 1000.ms),
 
+                  const SizedBox(height: 12),
+                  Text(
+                    'By Galfred Dev',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: AppColors.textMuted.withValues(alpha: 0.7),
+                      letterSpacing: 1.4,
+                    ),
+                  ),
                   const SizedBox(height: 32),
                 ],
               ),
