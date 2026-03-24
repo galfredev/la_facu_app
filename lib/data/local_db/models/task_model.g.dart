@@ -27,23 +27,28 @@ const TaskModelSchema = CollectionSchema(
       name: r'dueDate',
       type: IsarType.dateTime,
     ),
-    r'isDone': PropertySchema(
+    r'googleEventId': PropertySchema(
       id: 2,
+      name: r'googleEventId',
+      type: IsarType.string,
+    ),
+    r'isDone': PropertySchema(
+      id: 3,
       name: r'isDone',
       type: IsarType.bool,
     ),
     r'subjectName': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'subjectName',
       type: IsarType.string,
     ),
     r'title': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'title',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'type',
       type: IsarType.byte,
       enumMap: _TaskModeltypeEnumValueMap,
@@ -69,6 +74,12 @@ int _taskModelEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.googleEventId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.subjectName.length * 3;
   bytesCount += 3 + object.title.length * 3;
   return bytesCount;
@@ -82,10 +93,11 @@ void _taskModelSerialize(
 ) {
   writer.writeLong(offsets[0], object.colorValue);
   writer.writeDateTime(offsets[1], object.dueDate);
-  writer.writeBool(offsets[2], object.isDone);
-  writer.writeString(offsets[3], object.subjectName);
-  writer.writeString(offsets[4], object.title);
-  writer.writeByte(offsets[5], object.type.index);
+  writer.writeString(offsets[2], object.googleEventId);
+  writer.writeBool(offsets[3], object.isDone);
+  writer.writeString(offsets[4], object.subjectName);
+  writer.writeString(offsets[5], object.title);
+  writer.writeByte(offsets[6], object.type.index);
 }
 
 TaskModel _taskModelDeserialize(
@@ -97,11 +109,12 @@ TaskModel _taskModelDeserialize(
   final object = TaskModel();
   object.colorValue = reader.readLong(offsets[0]);
   object.dueDate = reader.readDateTime(offsets[1]);
+  object.googleEventId = reader.readStringOrNull(offsets[2]);
   object.id = id;
-  object.isDone = reader.readBool(offsets[2]);
-  object.subjectName = reader.readString(offsets[3]);
-  object.title = reader.readString(offsets[4]);
-  object.type = _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[5])] ??
+  object.isDone = reader.readBool(offsets[3]);
+  object.subjectName = reader.readString(offsets[4]);
+  object.title = reader.readString(offsets[5]);
+  object.type = _TaskModeltypeValueEnumMap[reader.readByteOrNull(offsets[6])] ??
       TaskTypeModel.exam;
   return object;
 }
@@ -118,12 +131,14 @@ P _taskModelDeserializeProp<P>(
     case 1:
       return (reader.readDateTime(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readBool(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (_TaskModeltypeValueEnumMap[reader.readByteOrNull(offset)] ??
           TaskTypeModel.exam) as P;
     default:
@@ -338,6 +353,160 @@ extension TaskModelQueryFilter
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'googleEventId',
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'googleEventId',
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'googleEventId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'googleEventId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'googleEventId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterFilterCondition>
+      googleEventIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'googleEventId',
+        value: '',
       ));
     });
   }
@@ -754,6 +923,18 @@ extension TaskModelQuerySortBy on QueryBuilder<TaskModel, TaskModel, QSortBy> {
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByGoogleEventId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByGoogleEventIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.desc);
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> sortByIsDone() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isDone', Sort.asc);
@@ -826,6 +1007,18 @@ extension TaskModelQuerySortThenBy
   QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByDueDateDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'dueDate', Sort.desc);
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByGoogleEventId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<TaskModel, TaskModel, QAfterSortBy> thenByGoogleEventIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.desc);
     });
   }
 
@@ -904,6 +1097,14 @@ extension TaskModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByGoogleEventId(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'googleEventId',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<TaskModel, TaskModel, QDistinct> distinctByIsDone() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'isDone');
@@ -948,6 +1149,12 @@ extension TaskModelQueryProperty
   QueryBuilder<TaskModel, DateTime, QQueryOperations> dueDateProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'dueDate');
+    });
+  }
+
+  QueryBuilder<TaskModel, String?, QQueryOperations> googleEventIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'googleEventId');
     });
   }
 

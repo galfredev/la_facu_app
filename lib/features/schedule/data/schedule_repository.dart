@@ -1,10 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:la_facu/data/local_db/isar_service.dart';
 import 'package:la_facu/data/local_db/models/class_event_model.dart';
-
-import 'package:la_facu/core/services/google_calendar_service.dart';
-
 import 'package:la_facu/core/services/google_calendar_service.dart';
 import 'package:la_facu/core/services/notification_service.dart';
 
@@ -26,9 +24,15 @@ class ScheduleRepository extends _$ScheduleRepository {
 
     // Sincronizar con Google Calendar si está disponible
     try {
-      await ref.read(googleCalendarServiceProvider).syncEventToGoogle(event);
+      final googleId = await ref.read(googleCalendarServiceProvider).syncEventToGoogle(event);
+      if (googleId != null) {
+        event.googleEventId = googleId;
+        await isar.writeTxn(() async {
+          await isar.classEventModels.put(event);
+        });
+      }
     } catch (e) {
-      print('Sincronización de horario fallida: $e');
+      debugPrint('Sincronización de horario fallida: $e');
     }
 
     // Programar recordatorio semanal
@@ -46,17 +50,20 @@ class ScheduleRepository extends _$ScheduleRepository {
         minute: minute,
       );
     } catch (e) {
-      print('Error al programar recordatorio semanal: $e');
+      debugPrint('Error al programar recordatorio semanal: $e');
     }
 
     ref.invalidateSelf();
   }
 
   Future<void> deleteEvent(Id id) async {
+    final isar = await ref.read(isarServiceProvider.future);
+    final event = await isar.classEventModels.get(id);
+
     // Cancelar notificación
     await ref.read(notificationServiceProvider).cancelNotification(id + 10000);
+    await ref.read(googleCalendarServiceProvider).deleteGoogleEvent(event?.googleEventId);
 
-    final isar = await ref.read(isarServiceProvider.future);
     await isar.writeTxn(() async {
       await isar.classEventModels.delete(id);
     });

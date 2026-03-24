@@ -73,9 +73,18 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.42417471798-conp6cgh134d0hojvqmts2pff65gsj11</string>
+				<string>com.googleusercontent.apps.42417471798-ch2un4767qmf7vsq2hi2v58tbv0a07qi</string>
 			</array>
 		</dict>
 	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>googlesignin</string>
+	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

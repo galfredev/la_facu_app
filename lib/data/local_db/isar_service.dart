@@ -44,6 +44,7 @@ class IsarService extends _$IsarService {
       await _isar.subjectModels.clear();
       await _isar.taskModels.clear();
       await _isar.classEventModels.clear();
+      await _isar.userModels.clear();
     });
   }
 

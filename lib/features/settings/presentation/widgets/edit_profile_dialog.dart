@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:estudio_forge/core/theme/app_theme.dart';
-import 'package:estudio_forge/features/settings/data/user_repository.dart';
+import 'package:la_facu/core/theme/app_theme.dart';
+import 'package:la_facu/features/settings/data/user_repository.dart';
 
 class EditProfileDialog extends ConsumerStatefulWidget {
   const EditProfileDialog({super.key});
@@ -51,7 +51,6 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = Theme.of(context).colorScheme.surface;
 
     return AlertDialog(
@@ -75,7 +74,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                       color: AppColors.primaryBlue.withValues(alpha: 0.1),
                     ),
                     clipBehavior: Clip.antiAlias,
-                    child: _photoPath != null 
+                    child: _photoPath != null
                         ? Image.file(File(_photoPath!), fit: BoxFit.cover)
                         : const Center(child: Icon(Icons.person_rounded, size: 50, color: AppColors.primaryBlue)),
                   ),

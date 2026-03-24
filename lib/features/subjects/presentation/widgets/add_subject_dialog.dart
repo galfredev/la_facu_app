@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:la_facu/data/local_db/models/subject_model.dart';
 import 'package:la_facu/features/subjects/data/subject_repository.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SubjectDialog extends ConsumerStatefulWidget {
   final SubjectModel? subject;
@@ -28,7 +29,9 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
     _nameController = TextEditingController(text: widget.subject?.name);
     _codeController = TextEditingController(text: widget.subject?.code);
     _professorController = TextEditingController(text: widget.subject?.professor);
-    _creditsController = TextEditingController(text: widget.subject?.credits.toString());
+    _creditsController = TextEditingController(
+      text: widget.subject?.credits.toString() ?? '',
+    );
     _selectedColor = widget.subject != null ? Color(widget.subject!.colorValue) : AppColors.subjectColors[0];
   }
 
@@ -52,12 +55,12 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.98),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.glassBorderBright),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -120,7 +123,7 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: colors.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final color = colors[index];
                       final isSelected = _selectedColor.toARGB32() == color.toARGB32();
@@ -134,7 +137,7 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
                             color: color,
                             shape: BoxShape.circle,
                             border: isSelected ? Border.all(color: Colors.white, width: 2.5) : null,
-                            boxShadow: isSelected ? [BoxShadow(color: color.withOpacity(0.4), blurRadius: 10, spreadRadius: 1)] : null,
+                            boxShadow: isSelected ? [BoxShadow(color: color.withValues(alpha: 0.4), blurRadius: 10, spreadRadius: 1)] : null,
                           ),
                           child: isSelected ? const Icon(Icons.check, color: Colors.white, size: 16) : null,
                         ),
@@ -182,7 +185,6 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
   }
 
   Widget _buildField(String tag, TextEditingController controller, IconData icon, {TextInputType? keyboardType, String? hint}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -193,22 +195,18 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w500),
+          style: GoogleFonts.outfit(
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+            color: Theme.of(context).textTheme.titleLarge?.color,
+          ),
           decoration: InputDecoration(
             hintText: hint,
             prefixIcon: Icon(icon, size: 18),
-            filled: true,
-            fillColor: isDark ? AppColors.surfaceVariant.withOpacity(0.2) : Colors.black.withOpacity(0.03),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withOpacity(0.5)),
-            ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: _selectedColor.withOpacity(0.5), width: 1.5),
+              borderSide: BorderSide(color: _selectedColor, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
           validator: (v) => v == null || v.isEmpty ? 'M_REQUIRED' : null,
         ),
@@ -238,9 +236,9 @@ class _SubjectDialogState extends ConsumerState<SubjectDialog> {
   void _save() async {
     if (_formKey.currentState!.validate()) {
       final subject = (widget.subject ?? SubjectModel())
-        ..name = _nameController.text
-        ..code = _codeController.text
-        ..professor = _professorController.text
+        ..name = _nameController.text.trim()
+        ..code = _codeController.text.trim()
+        ..professor = _professorController.text.trim()
         ..credits = int.tryParse(_creditsController.text) ?? 0
         ..colorValue = _selectedColor.toARGB32();
         

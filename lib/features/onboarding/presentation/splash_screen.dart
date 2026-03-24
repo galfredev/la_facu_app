@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
-import 'package:la_facu/features/settings/data/user_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:la_facu/core/auth/google_auth_service.dart';
+import 'package:la_facu/data/local_db/isar_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
@@ -20,25 +22,35 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _handleStart() async {
-    final prefs = await SharedPreferences.getInstance();
-    final onboardingDone = prefs.getBool('onboarding_done') ?? false;
+    try {
+      // 1. Esperar a que la base de datos Isar esté lista (fundamental)
+      await ref.read(isarServiceProvider.future);
 
-    // Simular carga de 2 segundos antes de navegar
-    await Future.delayed(const Duration(milliseconds: 2500));
-    
-    if (mounted) {
-      if (onboardingDone) {
-        context.go('/');
-      } else {
-        context.go('/onboarding');
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingDone = prefs.getBool('onboarding_done') ?? false;
+      final isLoggedIn = ref.read(googleAuthProvider) != null;
+
+      // Un tiempo mínimo de 2 segundos para mostrar el logo institucional
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      if (mounted) {
+        if (!onboardingDone) {
+          context.go('/onboarding');
+        } else if (!isLoggedIn) {
+          context.go('/login');
+        } else {
+          context.go('/');
+        }
       }
+    } catch (e) {
+      debugPrint('Error durante el arranque: $e');
+      // Si falla, intentamos ir al inicio de todos modos o mostramos error
+      if (mounted) context.go('/onboarding');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
@@ -70,9 +82,9 @@ class _SplashScreenState extends State<SplashScreen> {
             .animate(onPlay: (controller) => controller.repeat(reverse: true))
             .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 2.seconds, curve: Curves.easeInOut)
             .shimmer(delay: 500.ms, duration: 2.seconds, color: Colors.white24),
-            
+
             const SizedBox(height: 32),
-            
+
             // Nombre de la App
             Text(
               'La Facu',
@@ -81,9 +93,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontSize: 40,
               ),
             ).animate().fadeIn(delay: 400.ms).slideY(begin: 0.2),
-            
+
             const SizedBox(height: 8),
-            
+
             // Tagline
             Text(
               'ESTUDIANTE ENFOCADO',
@@ -93,9 +105,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 fontWeight: FontWeight.w700,
               ),
             ).animate().fadeIn(delay: 800.ms),
-            
+
             const SizedBox(height: 100),
-            
+
             // Indicador de carga sutil
             SizedBox(
               width: 40,

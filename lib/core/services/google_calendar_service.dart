@@ -1,7 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:la_facu/core/services/google_calendar_api.dart';
-import 'package:la_facu/features/subjects/data/subject_repository.dart';
-import 'package:la_facu/features/tasks/data/task_repository.dart';
-import 'package:la_facu/features/schedule/data/schedule_repository.dart';
+import 'package:la_facu/data/local_db/models/task_model.dart';
+import 'package:la_facu/data/local_db/models/class_event_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as calendar;
 
@@ -18,7 +18,7 @@ class GoogleCalendarService {
     if (_api == null) return [];
 
     try {
-      final events = await _api!.events.list(
+      final events = await _api.events.list(
         'primary',
         timeMin: minDate?.toUtc(),
         timeMax: maxDate?.toUtc(),
@@ -27,25 +27,109 @@ class GoogleCalendarService {
       );
       return events.items ?? [];
     } catch (e) {
-      print('Error al obtener eventos de Google: $e');
+      debugPrint('Error al obtener eventos de Google: $e');
       return [];
     }
   }
 
   /// Crear un evento en Google Calendar basado en un objeto local
-  Future<void> syncEventToGoogle(ClassEventModel localEvent) async {
-    if (_api == null) return;
+  Future<String?> syncEventToGoogle(ClassEventModel localEvent) async {
+    if (_api == null) return null;
+    final targetWeekday = localEvent.dayIndex + 1;
+    final event = _buildClassEvent(localEvent, targetWeekday);
 
-    // TODO: Implementar lógica para mapear ClassEventModel a calendar.Event
-    // Esto requiere manejar fechas reales basándose en el dayIndex y la semana actual
+    try {
+      if (localEvent.googleEventId case final googleId?) {
+        final updatedEvent = await _api.events.patch(event, 'primary', googleId);
+        return updatedEvent.id ?? googleId;
+      }
+
+      final createdEvent = await _api.events.insert(event, 'primary');
+      return createdEvent.id;
+    } catch (e) {
+      debugPrint('Error al sincronizar clase con Google: $e');
+      return null;
+    }
   }
 
   /// Crear una tarea en Google Calendar (como evento)
-  Future<void> syncTaskToGoogle(TaskModel localTask) async {
-    if (_api == null) return;
+  Future<String?> syncTaskToGoogle(TaskModel localTask) async {
+    if (_api == null) return null;
+    final event = _buildTaskEvent(localTask);
 
-    final event = calendar.Event()
-      ..summary = 'EstudioForge: ${localTask.title}'
+    try {
+      if (localTask.googleEventId case final googleId?) {
+        final updatedEvent = await _api.events.patch(event, 'primary', googleId);
+        return updatedEvent.id ?? googleId;
+      }
+
+      final createdEvent = await _api.events.insert(event, 'primary');
+      return createdEvent.id;
+    } catch (e) {
+      debugPrint('Error al insertar tarea en Google: $e');
+      return null;
+    }
+  }
+
+  Future<void> deleteGoogleEvent(String? googleEventId) async {
+    if (_api == null || googleEventId == null || googleEventId.isEmpty) return;
+
+    try {
+      await _api.events.delete('primary', googleEventId);
+    } catch (e) {
+      debugPrint('Error al borrar evento de Google: $e');
+    }
+  }
+
+  calendar.Event _buildClassEvent(
+    ClassEventModel localEvent,
+    int targetWeekday,
+  ) {
+    // Calcular la fecha del próximo evento basado en el dayIndex.
+    final now = DateTime.now();
+    int daysDiff = targetWeekday - now.weekday;
+    if (daysDiff < 0) {
+      daysDiff += 7;
+    }
+
+    final eventDate = now.add(Duration(days: daysDiff));
+    final startTimeParts = localEvent.startTime.split(':');
+    final endTimeParts = localEvent.endTime.split(':');
+
+    final startDateTime = DateTime(
+      eventDate.year,
+      eventDate.month,
+      eventDate.day,
+      int.parse(startTimeParts[0]),
+      int.parse(startTimeParts[1]),
+    );
+
+    final endDateTime = DateTime(
+      eventDate.year,
+      eventDate.month,
+      eventDate.day,
+      int.parse(endTimeParts[0]),
+      int.parse(endTimeParts[1]),
+    );
+
+    return calendar.Event()
+      ..summary = 'La Facu: ${localEvent.subjectName}'
+      ..location = 'Aula: ${localEvent.room}'
+      ..description = 'Clase programada desde la app La Facu'
+      ..start = calendar.EventDateTime(
+        dateTime: startDateTime.toUtc(),
+        timeZone: 'UTC',
+      )
+      ..end = calendar.EventDateTime(
+        dateTime: endDateTime.toUtc(),
+        timeZone: 'UTC',
+      )
+      ..recurrence = ['RRULE:FREQ=WEEKLY;BYDAY=${_getWeekDayCode(targetWeekday)}'];
+  }
+
+  calendar.Event _buildTaskEvent(TaskModel localTask) {
+    return calendar.Event()
+      ..summary = 'La Facu: ${localTask.title}'
       ..description = 'Materia: ${localTask.subjectName}'
       ..start = calendar.EventDateTime(
         dateTime: localTask.dueDate.toUtc(),
@@ -55,11 +139,18 @@ class GoogleCalendarService {
         dateTime: localTask.dueDate.add(const Duration(hours: 1)).toUtc(),
         timeZone: 'UTC',
       );
+  }
 
-    try {
-      await _api!.events.insert(event, 'primary');
-    } catch (e) {
-      print('Error al insertar tarea en Google: $e');
+  String _getWeekDayCode(int weekday) {
+    switch (weekday) {
+      case DateTime.monday: return 'MO';
+      case DateTime.tuesday: return 'TU';
+      case DateTime.wednesday: return 'WE';
+      case DateTime.thursday: return 'TH';
+      case DateTime.friday: return 'FR';
+      case DateTime.saturday: return 'SA';
+      case DateTime.sunday: return 'SU';
+      default: return 'MO';
     }
   }
 }

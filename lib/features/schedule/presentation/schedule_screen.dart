@@ -204,7 +204,7 @@ class _ScheduleScreenState extends ConsumerState<ScheduleScreen> {
     );
   },
   loading: () => const Center(child: CircularProgressIndicator()),
-  error: (e, __) => Center(child: Text('Error: $e')),
+  error: (e, _) => Center(child: Text('Error: $e')),
 );
   }
 }

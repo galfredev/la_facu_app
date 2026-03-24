@@ -12,4 +12,5 @@ class ClassEventModel {
   late String room;
   late int dayIndex;     // 0-6 (Lunes-Domingo)
   late int colorValue;
+  String? googleEventId; // ID del evento en Google Calendar
 }

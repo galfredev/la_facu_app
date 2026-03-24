@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:la_facu/data/local_db/isar_service.dart';
@@ -24,9 +25,15 @@ class TaskRepository extends _$TaskRepository {
     
     // Sincronizar con Google Calendar si está disponible
     try {
-      await ref.read(googleCalendarServiceProvider).syncTaskToGoogle(task);
+      final googleId = await ref.read(googleCalendarServiceProvider).syncTaskToGoogle(task);
+      if (googleId != null) {
+        task.googleEventId = googleId;
+        await isar.writeTxn(() async {
+          await isar.taskModels.put(task);
+        });
+      }
     } catch (e) {
-      print('Sincronización de tarea fallida: $e');
+      debugPrint('Sincronización de tarea fallida: $e');
     }
 
     // Programar recordatorio local
@@ -38,7 +45,7 @@ class TaskRepository extends _$TaskRepository {
         scheduledDate: task.dueDate.subtract(const Duration(hours: 2)), // Avisar 2 horas antes
       );
     } catch (e) {
-      print('Error al programar notificación: $e');
+      debugPrint('Error al programar notificación: $e');
     }
 
     ref.invalidateSelf();
@@ -62,10 +69,13 @@ class TaskRepository extends _$TaskRepository {
   }
 
   Future<void> deleteTask(Id id) async {
+    final isar = await ref.read(isarServiceProvider.future);
+    final task = await isar.taskModels.get(id);
+
     // Cancelar notificación primero
     await ref.read(notificationServiceProvider).cancelNotification(id);
-    
-    final isar = await ref.read(isarServiceProvider.future);
+    await ref.read(googleCalendarServiceProvider).deleteGoogleEvent(task?.googleEventId);
+
     await isar.writeTxn(() async {
       await isar.taskModels.delete(id);
     });

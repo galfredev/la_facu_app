@@ -32,18 +32,23 @@ const ClassEventModelSchema = CollectionSchema(
       name: r'endTime',
       type: IsarType.string,
     ),
-    r'room': PropertySchema(
+    r'googleEventId': PropertySchema(
       id: 3,
+      name: r'googleEventId',
+      type: IsarType.string,
+    ),
+    r'room': PropertySchema(
+      id: 4,
       name: r'room',
       type: IsarType.string,
     ),
     r'startTime': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'startTime',
       type: IsarType.string,
     ),
     r'subjectName': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'subjectName',
       type: IsarType.string,
     )
@@ -69,6 +74,12 @@ int _classEventModelEstimateSize(
 ) {
   var bytesCount = offsets.last;
   bytesCount += 3 + object.endTime.length * 3;
+  {
+    final value = object.googleEventId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.room.length * 3;
   bytesCount += 3 + object.startTime.length * 3;
   bytesCount += 3 + object.subjectName.length * 3;
@@ -84,9 +95,10 @@ void _classEventModelSerialize(
   writer.writeLong(offsets[0], object.colorValue);
   writer.writeLong(offsets[1], object.dayIndex);
   writer.writeString(offsets[2], object.endTime);
-  writer.writeString(offsets[3], object.room);
-  writer.writeString(offsets[4], object.startTime);
-  writer.writeString(offsets[5], object.subjectName);
+  writer.writeString(offsets[3], object.googleEventId);
+  writer.writeString(offsets[4], object.room);
+  writer.writeString(offsets[5], object.startTime);
+  writer.writeString(offsets[6], object.subjectName);
 }
 
 ClassEventModel _classEventModelDeserialize(
@@ -99,10 +111,11 @@ ClassEventModel _classEventModelDeserialize(
   object.colorValue = reader.readLong(offsets[0]);
   object.dayIndex = reader.readLong(offsets[1]);
   object.endTime = reader.readString(offsets[2]);
+  object.googleEventId = reader.readStringOrNull(offsets[3]);
   object.id = id;
-  object.room = reader.readString(offsets[3]);
-  object.startTime = reader.readString(offsets[4]);
-  object.subjectName = reader.readString(offsets[5]);
+  object.room = reader.readString(offsets[4]);
+  object.startTime = reader.readString(offsets[5]);
+  object.subjectName = reader.readString(offsets[6]);
   return object;
 }
 
@@ -120,10 +133,12 @@ P _classEventModelDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
+      return (reader.readString(offset)) as P;
+    case 6:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -468,6 +483,160 @@ extension ClassEventModelQueryFilter
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'endTime',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'googleEventId',
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'googleEventId',
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'googleEventId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'googleEventId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'googleEventId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'googleEventId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterFilterCondition>
+      googleEventIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'googleEventId',
         value: '',
       ));
     });
@@ -987,6 +1156,20 @@ extension ClassEventModelQuerySortBy
     });
   }
 
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy>
+      sortByGoogleEventId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy>
+      sortByGoogleEventIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy> sortByRoom() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'room', Sort.asc);
@@ -1072,6 +1255,20 @@ extension ClassEventModelQuerySortThenBy
     });
   }
 
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy>
+      thenByGoogleEventId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy>
+      thenByGoogleEventIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'googleEventId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ClassEventModel, ClassEventModel, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -1149,6 +1346,14 @@ extension ClassEventModelQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ClassEventModel, ClassEventModel, QDistinct>
+      distinctByGoogleEventId({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'googleEventId',
+          caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ClassEventModel, ClassEventModel, QDistinct> distinctByRoom(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -1194,6 +1399,13 @@ extension ClassEventModelQueryProperty
   QueryBuilder<ClassEventModel, String, QQueryOperations> endTimeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endTime');
+    });
+  }
+
+  QueryBuilder<ClassEventModel, String?, QQueryOperations>
+      googleEventIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'googleEventId');
     });
   }
 

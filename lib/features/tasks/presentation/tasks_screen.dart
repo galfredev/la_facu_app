@@ -110,7 +110,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> with SingleTickerProv
     );
   },
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (e, __) => Scaffold(body: Center(child: Text('Error: $e'))),
+      error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
     );
   }
 }
@@ -159,15 +159,6 @@ class _TaskCard extends ConsumerWidget {
     }
   }
 
-  String get _typeLabel {
-    switch (task.type) {
-      case TaskTypeModel.exam: return 'Parcial';
-      case TaskTypeModel.assignment: return 'TP';
-      case TaskTypeModel.quiz: return 'Quiz';
-      case TaskTypeModel.reading: return 'Lectura';
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final color = Color(task.colorValue);
@@ -179,7 +170,7 @@ class _TaskCard extends ConsumerWidget {
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
         decoration: BoxDecoration(
-          color: Colors.redAccent.withOpacity(0.2), // Changed .withValues to .withOpacity
+          color: Colors.redAccent.withValues(alpha: 0.2), // Changed .withValues to .withOpacity
           borderRadius: BorderRadius.circular(16),
         ),
         child: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),

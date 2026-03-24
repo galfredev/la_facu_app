@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
+import 'package:la_facu/data/local_db/models/subject_model.dart';
 import 'package:la_facu/data/local_db/models/task_model.dart';
 import 'package:la_facu/features/tasks/data/task_repository.dart';
 import 'package:la_facu/features/subjects/data/subject_repository.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddTaskDialog extends ConsumerStatefulWidget {
   final TaskModel? task;
@@ -51,12 +53,12 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.98),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.glassBorderBright),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -103,7 +105,11 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
                 _buildFieldTag('TASK_TITLE'),
                 TextFormField(
                   controller: _titleController,
-                  style: GoogleFonts.outfit(fontSize: 15, fontWeight: FontWeight.w500),
+                  style: GoogleFonts.outfit(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).textTheme.titleLarge?.color,
+                  ),
                   decoration: _inputDecoration(Icons.assignment_outlined, hint: 'Ej: Informe Final'),
                   validator: (v) => v == null || v.isEmpty ? 'T_REQUIRED' : null,
                 ),
@@ -118,20 +124,45 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
                           _buildFieldTag('SUBJECT'),
                           subjectsAsync.when(
                             data: (subjects) => DropdownButtonFormField<String>(
-                              value: _selectedSubjectName,
+                              initialValue: _selectedSubjectName,
                               isExpanded: true,
-                              style: GoogleFonts.outfit(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+                              style: GoogleFonts.outfit(
+                                fontSize: 14,
+                                color: Theme.of(context).textTheme.titleLarge?.color,
+                              ),
                               decoration: _inputDecoration(Icons.book_outlined),
-                              items: subjects.map((s) => DropdownMenuItem(
-                                value: s.name,
-                                child: Text(s.name, overflow: TextOverflow.ellipsis),
-                                onTap: () => _selectedColor = Color(s.colorValue),
-                              )).toList(),
-                              onChanged: (v) => setState(() => _selectedSubjectName = v),
+                              items: subjects
+                                  .map(
+                                    (s) => DropdownMenuItem(
+                                      value: s.name,
+                                      child: Text(
+                                        s.name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (v) {
+                                SubjectModel? selectedSubject;
+                                for (final subject in subjects) {
+                                  if (subject.name == v) {
+                                    selectedSubject = subject;
+                                    break;
+                                  }
+                                }
+                                setState(() {
+                                  _selectedSubjectName = v;
+                                  if (selectedSubject != null) {
+                                    _selectedColor = Color(
+                                      selectedSubject.colorValue,
+                                    );
+                                  }
+                                });
+                              },
                               validator: (v) => v == null ? 'REQ' : null,
                             ),
                             loading: () => const LinearProgressIndicator(),
-                            error: (_, __) => const Icon(Icons.error_outline),
+                            error: (_, _) => const Icon(Icons.error_outline),
                           ),
                         ],
                       ),
@@ -143,8 +174,11 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
                         children: [
                           _buildFieldTag('TYPE'),
                           DropdownButtonFormField<TaskTypeModel>(
-                            value: _selectedType,
-                            style: GoogleFonts.outfit(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+                            initialValue: _selectedType,
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
                             decoration: _inputDecoration(Icons.category_outlined),
                             items: TaskTypeModel.values.map((t) => DropdownMenuItem(
                               value: t,
@@ -166,9 +200,9 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceVariant.withOpacity(0.2) : Colors.black.withOpacity(0.03),
+                      color: isDark ? AppColors.surfaceVariant.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withOpacity(0.5)),
+                      border: Border.all(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withValues(alpha: 0.5)),
                     ),
                     child: Row(
                       children: [
@@ -176,7 +210,11 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
                         const SizedBox(width: 12),
                         Text(
                           DateFormat("d MMM, yyyy", 'es_ES').format(_selectedDate),
-                          style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w600),
+                          style: GoogleFonts.outfit(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).textTheme.titleLarge?.color,
+                          ),
                         ),
                         const Spacer(),
                         const Icon(Icons.edit_calendar_rounded, size: 18, color: AppColors.textMuted),
@@ -232,22 +270,9 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
   }
 
   InputDecoration _inputDecoration(IconData icon, {String? hint}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       hintText: hint,
       prefixIcon: Icon(icon, size: 18),
-      filled: true,
-      fillColor: isDark ? AppColors.surfaceVariant.withOpacity(0.2) : Colors.black.withOpacity(0.03),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withOpacity(0.5)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primaryBlue, width: 1.5),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     );
   }
 
@@ -292,7 +317,7 @@ class _AddTaskDialogState extends ConsumerState<AddTaskDialog> {
       if (_selectedSubjectName == null) return;
       
       final task = (widget.task ?? TaskModel())
-        ..title = _titleController.text
+        ..title = _titleController.text.trim()
         ..subjectName = _selectedSubjectName!
         ..dueDate = _selectedDate
         ..type = _selectedType

@@ -6,8 +6,8 @@ import 'package:la_facu/features/schedule/presentation/schedule_screen.dart';
 import 'package:la_facu/features/tasks/presentation/tasks_screen.dart';
 import 'package:la_facu/features/onboarding/presentation/splash_screen.dart';
 import 'package:la_facu/features/onboarding/presentation/onboarding_screen.dart';
+import 'package:la_facu/features/onboarding/presentation/login_screen.dart';
 import 'package:la_facu/features/settings/presentation/settings_screen.dart';
-import 'package:la_facu/features/settings/data/user_repository.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -21,6 +21,11 @@ final appRouter = GoRouter(
       path: '/onboarding',
       name: 'onboarding',
       builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/login',
+      name: 'login',
+      builder: (context, state) => const LoginScreen(),
     ),
     ShellRoute(
       builder: (context, state, child) => AppShell(child: child),

@@ -15,6 +15,7 @@ class TaskModel {
   
   late bool isDone;
   late int colorValue;
+  String? googleEventId; // ID del evento en Google Calendar
 }
 
 enum TaskTypeModel { exam, assignment, quiz, reading }

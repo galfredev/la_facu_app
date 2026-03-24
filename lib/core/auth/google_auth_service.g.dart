@@ -6,12 +6,11 @@ part of 'google_auth_service.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$googleAuthHash() => r'32b4b6a191812555bfb9670360bddf19817b043d';
+String _$googleAuthHash() => r'36643ad0cbca405bfa8d3bce8ac3a83e39cc9242';
 
 /// See also [GoogleAuth].
 @ProviderFor(GoogleAuth)
-final googleAuthProvider =
-    NotifierProvider<GoogleAuth, GoogleSignInAccount?>.internal(
+final googleAuthProvider = NotifierProvider<GoogleAuth, UserInfo?>.internal(
   GoogleAuth.new,
   name: r'googleAuthProvider',
   debugGetCreateSourceHash:
@@ -20,6 +19,6 @@ final googleAuthProvider =
   allTransitiveDependencies: null,
 );
 
-typedef _$GoogleAuth = Notifier<GoogleSignInAccount?>;
+typedef _$GoogleAuth = Notifier<UserInfo?>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:la_facu/data/local_db/models/class_event_model.dart';
+import 'package:la_facu/data/local_db/models/subject_model.dart';
 import 'package:la_facu/features/schedule/data/schedule_repository.dart';
 import 'package:la_facu/features/subjects/data/subject_repository.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AddEventDialog extends ConsumerStatefulWidget {
   final ClassEventModel? event;
@@ -51,7 +53,9 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
   void dispose() {
     _roomController.dispose();
     super.dispose();
-  }  @override
+  }
+
+  @override
   Widget build(BuildContext context) {
     final subjectsAsync = ref.watch(subjectRepositoryProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -62,12 +66,12 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface.withOpacity(0.98),
+          color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.98),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.glassBorderBright),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             )
@@ -114,20 +118,40 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
                 _buildFieldTag('SUBJECT_LINK'),
                 subjectsAsync.when(
                   data: (subjects) => DropdownButtonFormField<String>(
-                    value: _selectedSubjectName,
+                    initialValue: _selectedSubjectName,
                     isExpanded: true,
-                    style: GoogleFonts.outfit(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+                    style: GoogleFonts.outfit(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.titleLarge?.color,
+                    ),
                     decoration: _inputDecoration(Icons.book_outlined),
-                    items: subjects.map((s) => DropdownMenuItem(
-                      value: s.name,
-                      child: Text(s.name, overflow: TextOverflow.ellipsis),
-                      onTap: () => _selectedColor = Color(s.colorValue),
-                    )).toList(),
-                    onChanged: (v) => setState(() => _selectedSubjectName = v),
+                    items: subjects
+                        .map(
+                          (s) => DropdownMenuItem(
+                            value: s.name,
+                            child: Text(s.name, overflow: TextOverflow.ellipsis),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      SubjectModel? selectedSubject;
+                      for (final subject in subjects) {
+                        if (subject.name == v) {
+                          selectedSubject = subject;
+                          break;
+                        }
+                      }
+                      setState(() {
+                        _selectedSubjectName = v;
+                        if (selectedSubject != null) {
+                          _selectedColor = Color(selectedSubject.colorValue);
+                        }
+                      });
+                    },
                     validator: (v) => v == null ? 'REQ' : null,
                   ),
                   loading: () => const LinearProgressIndicator(),
-                  error: (_, __) => const Icon(Icons.error_outline),
+                  error: (_, _) => const Icon(Icons.error_outline),
                 ),
                 const SizedBox(height: 16),
                 
@@ -140,8 +164,11 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
                         children: [
                           _buildFieldTag('DAY_OF_WEEK'),
                           DropdownButtonFormField<int>(
-                            value: _selectedDayIndex,
-                            style: GoogleFonts.outfit(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
+                            initialValue: _selectedDayIndex,
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
                             decoration: _inputDecoration(Icons.calendar_today_rounded),
                             items: List.generate(7, (i) => DropdownMenuItem(
                               value: i,
@@ -161,7 +188,11 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
                           _buildFieldTag('ROOM_ID'),
                           TextFormField(
                             controller: _roomController,
-                            style: GoogleFonts.outfit(fontSize: 14, fontWeight: FontWeight.w500),
+                            style: GoogleFonts.outfit(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).textTheme.titleLarge?.color,
+                            ),
                             decoration: _inputDecoration(Icons.location_on_outlined, hint: 'Aula'),
                             validator: (v) => v == null || v.isEmpty ? 'REQ' : null,
                           ),
@@ -244,9 +275,9 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceVariant.withOpacity(0.2) : Colors.black.withOpacity(0.03),
+        color: isDark ? AppColors.surfaceVariant.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withOpacity(0.5)),
+        border: Border.all(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +286,11 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
           const SizedBox(height: 4),
           Text(
             time.format(context),
-            style: GoogleFonts.jetBrainsMono(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primaryBlue),
+            style: GoogleFonts.jetBrainsMono(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primaryBlue,
+            ),
           ),
         ],
       ),
@@ -268,11 +303,11 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
       hintText: hint,
       prefixIcon: Icon(icon, size: 18),
       filled: true,
-      fillColor: isDark ? AppColors.surfaceVariant.withOpacity(0.2) : Colors.black.withOpacity(0.03),
+      fillColor: isDark ? AppColors.surfaceVariant.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.03),
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withOpacity(0.5)),
+        borderSide: BorderSide(color: isDark ? AppColors.glassBorder : AppColors.lightGlassBorder.withValues(alpha: 0.5)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -289,7 +324,11 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
     );
     if (t != null) {
       setState(() {
-        if (isStart) _startTime = t; else _endTime = t;
+        if (isStart) {
+          _startTime = t;
+        } else {
+          _endTime = t;
+        }
       });
     }
   }
@@ -313,12 +352,24 @@ class _AddEventDialogState extends ConsumerState<AddEventDialog> {
 
   void _save() async {
     if (_formKey.currentState!.validate()) {
+      final startMinutes = (_startTime.hour * 60) + _startTime.minute;
+      final endMinutes = (_endTime.hour * 60) + _endTime.minute;
+
+      if (endMinutes <= startMinutes) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('La hora de fin debe ser posterior al inicio.'),
+          ),
+        );
+        return;
+      }
+
       final event = (widget.event ?? ClassEventModel())
         ..subjectName = _selectedSubjectName!
         ..dayIndex = _selectedDayIndex
         ..startTime = '${_startTime.hour.toString().padLeft(2, '0')}:${_startTime.minute.toString().padLeft(2, '0')}'
         ..endTime = '${_endTime.hour.toString().padLeft(2, '0')}:${_endTime.minute.toString().padLeft(2, '0')}'
-        ..room = _roomController.text
+        ..room = _roomController.text.trim()
         ..colorValue = _selectedColor.toARGB32();
 
       await ref.read(scheduleRepositoryProvider.notifier).addEvent(event);

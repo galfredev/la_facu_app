@@ -8,7 +8,7 @@ import 'package:la_facu/core/theme/theme_provider.dart';
 import 'package:la_facu/core/services/notification_service.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_ES', null);
   
@@ -16,17 +16,20 @@ void main() async {
   final notificationService = NotificationService();
   await notificationService.init();
   
-  runApp(const ProviderScope(child: EstudioForgeApp()));
+  runApp(const ProviderScope(child: LaFacuApp()));
 }
 
-class EstudioForgeApp extends ConsumerWidget {
-  const EstudioForgeApp({super.key});
+class LaFacuApp extends ConsumerWidget {
+  const LaFacuApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
-    final isDark = themeMode == ThemeMode.dark || 
-                  (themeMode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+    final platformBrightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    final isDark = themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system &&
+            platformBrightness == Brightness.dark);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
@@ -36,7 +39,7 @@ class EstudioForgeApp extends ConsumerWidget {
         systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
       child: MaterialApp.router(
-        title: 'EstudioForge',
+        title: 'La Facu',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,

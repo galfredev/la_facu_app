@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:la_facu/core/theme/app_theme.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/features/subjects/data/subject_repository.dart';
@@ -54,7 +53,7 @@ class SubjectsScreen extends ConsumerWidget {
                   ).animate().fadeIn(delay: (150 + i * 70).ms, duration: 400.ms).slideY(begin: 0.05),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, __) => Center(child: Text('Error: $e')),
+                error: (e, _) => Center(child: Text('Error: $e')),
               ),
             ),
           ],
@@ -145,14 +144,4 @@ class _SubjectCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Subject {
-  final String name;
-  final String code;
-  final String professor;
-  final int credit;
-  final Color color;
-  final double progress;
-  const _Subject({required this.name, required this.code, required this.professor, required this.credit, required this.color, required this.progress});
 }

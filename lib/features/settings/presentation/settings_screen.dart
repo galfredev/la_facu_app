@@ -4,8 +4,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/auth/google_auth_service.dart';
+import 'package:la_facu/core/services/google_calendar_service.dart';
+import 'package:la_facu/core/services/notification_service.dart';
 import 'package:la_facu/core/theme/theme_provider.dart';
 import 'package:la_facu/data/local_db/isar_service.dart';
+import 'package:la_facu/data/local_db/models/user_model.dart';
 import 'package:la_facu/features/subjects/data/subject_repository.dart';
 import 'package:la_facu/features/tasks/data/task_repository.dart';
 import 'package:la_facu/features/schedule/data/schedule_repository.dart';
@@ -17,7 +20,6 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final googleUser = ref.watch(googleAuthProvider);
     final userAsync = ref.watch(userRepositoryProvider);
@@ -40,7 +42,7 @@ class SettingsScreen extends ConsumerWidget {
               userAsync.when(
                 data: (user) => _ProfileCard(user: user).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
                 loading: () => const _ProfileCardLoading(),
-                error: (_, __) => const Text('Error al cargar perfil'),
+                error: (_, _) => const Text('Error al cargar perfil'),
               ),
 
               const SizedBox(height: 24),
@@ -75,10 +77,12 @@ class SettingsScreen extends ConsumerWidget {
                         }
                       } catch (e) {
                         if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                            content: Text('Google Sign-In aún no está disponible en Windows. Usa la versión móvil!'),
-                            backgroundColor: Colors.orangeAccent,
-                          ));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('No se pudo completar la conexión con Google: $e'),
+                              backgroundColor: Colors.orangeAccent,
+                            ),
+                          );
                         }
                       }
                     },
@@ -92,15 +96,15 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: 'Recordatorios en este dispositivo', 
                     color: AppColors.accentSage,
                     trailing: userAsync.when(
-                      data: (user) => Switch(
+                      data: (user) =>                       Switch(
                         value: user?.notificationsEnabled ?? true,
-                        activeColor: AppColors.primaryBlue,
+                        activeThumbColor: AppColors.primaryBlue,
                         onChanged: (val) {
                           ref.read(userRepositoryProvider.notifier).toggleNotifications();
                         },
                       ),
                       loading: () => const SizedBox.shrink(),
-                      error: (_, __) => const SizedBox.shrink(),
+                      error: (_, _) => const SizedBox.shrink(),
                     ),
                     onTap: () => ref.read(userRepositoryProvider.notifier).toggleNotifications(),
                   ),
@@ -115,9 +119,9 @@ class SettingsScreen extends ConsumerWidget {
                     label: 'Tema', 
                     subtitle: isDark ? 'Modo Oscuro (Enfocado)' : 'Modo Claro (Limpio)', 
                     color: isDark ? AppColors.accentSage : AppColors.primaryBlue,
-                    trailing: Switch(
+                    trailing:                       Switch(
                       value: !isDark,
-                      activeColor: AppColors.primaryBlue,
+                      activeThumbColor: AppColors.primaryBlue,
                       onChanged: (val) {
                         ref.read(themeModeProvider.notifier).toggleTheme();
                       },
@@ -153,6 +157,23 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       );
                       if (confirm == true) {
+                        final isar = await ref.read(isarServiceProvider.future);
+                        final tasks = await isar.taskModels.where().findAll();
+                        final events = await isar.classEventModels.where().findAll();
+
+                        for (final task in tasks) {
+                          await ref.read(
+                            googleCalendarServiceProvider,
+                          ).deleteGoogleEvent(task.googleEventId);
+                        }
+
+                        for (final event in events) {
+                          await ref.read(
+                            googleCalendarServiceProvider,
+                          ).deleteGoogleEvent(event.googleEventId);
+                        }
+
+                        await ref.read(notificationServiceProvider).cancelAll();
                         await ref.read(isarServiceProvider.notifier).clearAllData();
                         ref.invalidate(subjectRepositoryProvider);
                         ref.invalidate(taskRepositoryProvider);
@@ -183,13 +204,14 @@ class SettingsScreen extends ConsumerWidget {
 }
 
 class _ProfileCard extends StatelessWidget {
-  final dynamic user;
+  final UserModel? user;
   const _ProfileCard({required this.user});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final photoPath = user?.photoPath;
+    final hasPhoto = photoPath != null && File(photoPath).existsSync();
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -216,11 +238,14 @@ class _ProfileCard extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.primaryBlue.withValues(alpha: 0.1),
-              image: photoPath != null 
-                  ? DecorationImage(image: FileImage(File(photoPath)), fit: BoxFit.cover)
+              image: hasPhoto
+                  ? DecorationImage(
+                      image: FileImage(File(photoPath)),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
-            child: photoPath == null 
+            child: !hasPhoto
                 ? const Center(child: Icon(Icons.person_rounded, color: AppColors.primaryBlue, size: 32))
                 : null,
           ),
