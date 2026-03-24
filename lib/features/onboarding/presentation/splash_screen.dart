@@ -59,29 +59,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           children: [
             // Logo Minimalista con animación de pulso
             Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.3), width: 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.2),
-                    blurRadius: 30,
-                    spreadRadius: 10,
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primaryBlue.withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                        blurRadius: 30,
+                        spreadRadius: 10,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.school_rounded,
-                size: 50,
-                color: AppColors.primaryBlue,
-              ),
-            )
-            .animate(onPlay: (controller) => controller.repeat(reverse: true))
-            .scale(begin: const Offset(1, 1), end: const Offset(1.1, 1.1), duration: 2.seconds, curve: Curves.easeInOut)
-            .shimmer(delay: 500.ms, duration: 2.seconds, color: Colors.white24),
+                  child: const Icon(
+                    Icons.school_rounded,
+                    size: 50,
+                    color: AppColors.primaryBlue,
+                  ),
+                )
+                .animate(
+                  onPlay: (controller) => controller.repeat(reverse: true),
+                )
+                .scale(
+                  begin: const Offset(1, 1),
+                  end: const Offset(1.1, 1.1),
+                  duration: 2.seconds,
+                  curve: Curves.easeInOut,
+                )
+                .shimmer(
+                  delay: 500.ms,
+                  duration: 2.seconds,
+                  color: Colors.white24,
+                ),
 
             const SizedBox(height: 32),
 

@@ -145,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Benefits Section
                   _BenefitItem(
                     icon: Icons.sync_rounded,
-                    title: 'Sincronización Total',
+                    title: 'Sincronización total',
                     subtitle: 'Toda tu cursada conectada con Google Calendar.',
                   ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
 
@@ -153,16 +153,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   _BenefitItem(
                     icon: Icons.notifications_active_rounded,
-                    title: 'Notificaciones Smart',
+                    title: 'Notificaciones inteligentes',
                     subtitle:
-                        'Alertas automáticas para que no se te pase nada.',
+                        'Alertas automÃ¡ticas para que no se te pase nada.',
                   ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
 
                   const SizedBox(height: 20),
 
                   _BenefitItem(
                     icon: Icons.auto_awesome_rounded,
-                    title: 'Personalización Elite',
+                    title: 'Personalización premium',
                     subtitle: 'Diseño adaptado a tu estilo de estudio.',
                   ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1),
 
@@ -277,7 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: 12),
                   Text(
-                    'By Galfred Dev',
+                    'Galfred Dev',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.textMuted.withValues(alpha: 0.7),
                       letterSpacing: 1.4,

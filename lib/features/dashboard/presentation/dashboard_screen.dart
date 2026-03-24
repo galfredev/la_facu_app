@@ -28,7 +28,7 @@ class DashboardScreen extends ConsumerWidget {
     final googleUser = ref.watch(googleAuthProvider);
     final now = DateTime.now();
     final greeting = now.hour < 12
-        ? 'Buenos dÃ­as'
+        ? 'Buenos dƒÂ­as'
         : now.hour < 19
         ? 'Buenas tardes'
         : 'Buenas noches';
@@ -224,7 +224,7 @@ class DashboardScreen extends ConsumerWidget {
                                         (e) => _EventCard(
                                           title: e.subjectName,
                                           subtitle:
-                                              '${e.startTime} - ${e.endTime} â€¢ ${e.room}',
+                                              '${e.startTime} - ${e.endTime} ¢â‚¬Â¢ ${e.room}',
                                           color: Color(e.colorValue),
                                           icon: Icons.school_rounded,
                                           onTap: () => context.go('/schedule'),
@@ -321,7 +321,7 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  // ----- ACCIONES RÃPIDAS (MODERN BAR) -----
+                  // ----- ACCIONES RƒÂPIDAS (MODERN BAR) -----
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -360,7 +360,7 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 40),
 
-                  // ----- PROGRESO ACADÃ‰MICO -----
+                  // ----- PROGRESO ACADƒâ€°MICO -----
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
@@ -406,14 +406,14 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  // ----- PRÃ“XIMAS TAREAS -----
+                  // ----- PRƒâ€œXIMAS TAREAS -----
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Pendientes CrÃ­ticos',
+                          'Pendientes CrƒÂ­ticos',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w800),
                         ),
@@ -438,7 +438,7 @@ class DashboardScreen extends ConsumerWidget {
                                 return _EventCard(
                                       title: t.title,
                                       subtitle:
-                                          '${t.subjectName} â€¢ ${DateFormat("d MMM").format(t.dueDate)}',
+                                          '${t.subjectName} ¢â‚¬Â¢ ${DateFormat("d MMM").format(t.dueDate)}',
                                       color: Color(t.colorValue),
                                       icon: _taskIcon(t.type),
                                       onTap: () => context.go('/tasks'),
@@ -563,7 +563,7 @@ class _EmptyHoyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Â¡DÃ­a Libre!',
+                  '‚¡DƒÂ­a Libre!',
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),

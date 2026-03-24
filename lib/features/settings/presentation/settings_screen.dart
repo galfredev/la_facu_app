@@ -264,7 +264,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.info_rounded,
                     label: 'La Facu',
-                    subtitle: 'v1.0.0 • by GalfreDev',
+                    subtitle: 'v1.0.0 â€¢ by GalfreDev',
                     color: AppColors.textMuted,
                   ),
                 ],
