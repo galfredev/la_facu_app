@@ -17,7 +17,10 @@ class GoogleAuth extends _$GoogleAuth {
   UserInfo? _currentUser;
   bool _hasWarnedMissingCredentials = false;
 
-  static const _clientId = '42417471798-ch2un4767qmf7vsq2hi2v58tbv0a07qi.apps.googleusercontent.com';
+  static const _desktopClientId =
+      '453274240916-5jn4l3f4lu80mrolkk81ome1eojl3oml.apps.googleusercontent.com';
+  static const _androidClientId =
+      '453274240916-aujidgi1oemn2io0774lcd1ovatdfjmq.apps.googleusercontent.com';
 
   static const _scopes = [
     'email',
@@ -76,7 +79,8 @@ class GoogleAuth extends _$GoogleAuth {
   }
 
   Future<UserInfo?> _authenticateWithGoogle() async {
-    if (_clientId.isEmpty) {
+    final clientId = _authClientId;
+    if (clientId.isEmpty) {
       _warnMissingCredentials();
       return null;
     }
@@ -88,7 +92,7 @@ class GoogleAuth extends _$GoogleAuth {
     final state = DateTime.now().millisecondsSinceEpoch.toString();
     final authUrl = Uri.parse(
       'https://accounts.google.com/o/oauth2/v2/auth'
-      '?client_id=${Uri.encodeComponent(_clientId)}'
+      '?client_id=${Uri.encodeComponent(clientId)}'
       '&redirect_uri=${Uri.encodeComponent(redirectUri)}'
       '&response_type=code'
       '&scope=${Uri.encodeComponent(_scopes.join(' '))}'
@@ -102,9 +106,7 @@ class GoogleAuth extends _$GoogleAuth {
     try {
       await Clipboard.setData(ClipboardData(text: authUrl.toString()));
 
-      final response = await _waitForCode(
-        duration: const Duration(minutes: 5),
-      );
+      final response = await _waitForCode(duration: const Duration(minutes: 5));
 
       if (response != null && response.isNotEmpty) {
         return _getUserInfoFromCode(response, redirectUri, codeVerifier);
@@ -117,7 +119,8 @@ class GoogleAuth extends _$GoogleAuth {
   }
 
   Future<_DesktopAuthResult?> _getAuthorizationCodeDesktop() async {
-    if (_clientId.isEmpty) {
+    final clientId = _authClientId;
+    if (clientId.isEmpty) {
       _warnMissingCredentials();
       return null;
     }
@@ -137,7 +140,7 @@ class GoogleAuth extends _$GoogleAuth {
       host: 'accounts.google.com',
       path: '/o/oauth2/v2/auth',
       queryParameters: {
-        'client_id': _clientId,
+        'client_id': clientId,
         'redirect_uri': redirectUri,
         'response_type': 'code',
         'scope': _scopes.join(' '),
@@ -216,7 +219,7 @@ class GoogleAuth extends _$GoogleAuth {
         Uri.parse('https://oauth2.googleapis.com/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
-          'client_id': _clientId,
+          'client_id': _authClientId,
           'code': authCode,
           'grant_type': 'authorization_code',
           'redirect_uri': redirectUri,
@@ -281,6 +284,13 @@ class GoogleAuth extends _$GoogleAuth {
 
     _hasWarnedMissingCredentials = true;
     debugPrint('Faltan credenciales de Google para autenticacion.');
+  }
+
+  String get _authClientId {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      return _desktopClientId;
+    }
+    return _androidClientId;
   }
 
   String _generateCodeVerifier() {
