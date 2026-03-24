@@ -132,7 +132,7 @@ class GoogleAuth extends _$GoogleAuth {
       0,
       shared: true,
     );
-    final redirectUri = 'http://127.0.0.1:${server.port}/callback';
+    final redirectUri = 'http://127.0.0.1:${server.port}';
     final codeVerifier = _generateCodeVerifier();
     final codeChallenge = _codeChallengeS256(codeVerifier);
     final state = DateTime.now().millisecondsSinceEpoch.toString();
@@ -168,7 +168,8 @@ class GoogleAuth extends _$GoogleAuth {
     unawaited(() async {
       try {
         await for (final request in server) {
-          if (request.uri.path != '/callback') {
+          final requestPath = request.uri.path;
+          if (requestPath.isNotEmpty && requestPath != '/') {
             request.response.statusCode = HttpStatus.notFound;
             await request.response.close();
             continue;
