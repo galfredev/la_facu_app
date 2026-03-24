@@ -14,20 +14,25 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
+  bool _showSuccess = false;
 
   void _handleLogin() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final account = await ref.read(googleAuthProvider.notifier).login();
       if (account != null && mounted) {
-        context.go('/');
+        setState(() => _showSuccess = true);
+        await Future.delayed(const Duration(milliseconds: 900));
+        if (mounted) {
+          context.go('/');
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al iniciar sesión: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error al iniciar sesión: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -40,18 +45,31 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
+          AnimatedOpacity(
+            opacity: _showSuccess ? 1 : 0,
+            duration: const Duration(milliseconds: 300),
+            child: Container(
+              color: AppColors.primaryBlue.withValues(alpha: 0.08),
+            ),
+          ),
           // Background Decor (Glows)
           Positioned(
             top: -100,
             right: -100,
-            child: _CircleGlow(color: AppColors.primaryBlue.withValues(alpha: 0.2), size: 300),
+            child: _CircleGlow(
+              color: AppColors.primaryBlue.withValues(alpha: 0.2),
+              size: 300,
+            ),
           ),
           Positioned(
             bottom: -50,
             left: -50,
-            child: _CircleGlow(color: AppColors.accentSage.withValues(alpha: 0.1), size: 250),
+            child: _CircleGlow(
+              color: AppColors.accentSage.withValues(alpha: 0.1),
+              size: 250,
+            ),
           ),
-          
+
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -66,11 +84,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.primaryBlue.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.primaryBlue.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: AppColors.primaryBlue.withValues(alpha: 0.2),
+                      ),
                     ),
-                    child: const Icon(Icons.school_rounded, color: AppColors.primaryBlue, size: 40),
-                  ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack),
-                  
+                    child: const Icon(
+                      Icons.school_rounded,
+                      color: AppColors.primaryBlue,
+                      size: 40,
+                    ),
+                  ).animate().scale(
+                    duration: 600.ms,
+                    curve: Curves.easeOutBack,
+                  ),
+
                   const SizedBox(height: 24),
                   Text(
                     'La Facu',
@@ -79,7 +106,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       letterSpacing: -1,
                     ),
                   ).animate().fadeIn(delay: 200.ms),
-                  
+
                   const SizedBox(height: 12),
                   Text(
                     'Tu asistente académico inteligente',
@@ -88,34 +115,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: AppColors.textSecondary,
                     ),
                   ).animate().fadeIn(delay: 300.ms),
-                  
+
                   const SizedBox(height: 60),
-                  
+
                   // Benefits Section
                   _BenefitItem(
                     icon: Icons.sync_rounded,
                     title: 'Sincronización Total',
                     subtitle: 'Toda tu cursada conectada con Google Calendar.',
                   ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   _BenefitItem(
                     icon: Icons.notifications_active_rounded,
                     title: 'Notificaciones Smart',
-                    subtitle: 'Alertas automáticas para que no se te pase nada.',
+                    subtitle:
+                        'Alertas automáticas para que no se te pase nada.',
                   ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
-                  
+
                   const SizedBox(height: 20),
-                  
+
                   _BenefitItem(
                     icon: Icons.auto_awesome_rounded,
                     title: 'Personalización Elite',
                     subtitle: 'Diseño adaptado a tu estilo de estudio.',
                   ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1),
-                  
+
                   const Spacer(),
-                  
+
                   // Login Button
                   if (_isLoading)
                     const CircularProgressIndicator()
@@ -126,7 +154,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 56),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                         elevation: 0,
                       ),
                       child: Row(
@@ -136,12 +166,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(width: 12),
                           const Text(
                             'INGRESAR CON GOOGLE',
-                            style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
                           ),
                         ],
                       ),
                     ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2),
-                  
+
+                  const SizedBox(height: 16),
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: _showSuccess
+                        ? Container(
+                            key: const ValueKey('google-success'),
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryBlue.withValues(
+                                alpha: 0.12,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.primaryBlue.withValues(
+                                  alpha: 0.2,
+                                ),
+                              ),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(
+                                  Icons.verified_rounded,
+                                  color: AppColors.primaryBlue,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Cuenta conectada. Preparando tu espacio personal...',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(key: ValueKey('empty-success')),
+                  ),
                   const SizedBox(height: 16),
                   TextButton(
                     onPressed: () => context.go('/'),
@@ -154,7 +226,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                     ),
                   ).animate().fadeIn(delay: 1000.ms),
-                  
+
                   const SizedBox(height: 32),
                 ],
               ),
@@ -179,11 +251,7 @@ class _CircleGlow extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(
-            color: color,
-            blurRadius: size / 2,
-            spreadRadius: size / 4,
-          ),
+          BoxShadow(color: color, blurRadius: size / 2, spreadRadius: size / 4),
         ],
       ),
     );
@@ -194,8 +262,12 @@ class _BenefitItem extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  
-  const _BenefitItem({required this.icon, required this.title, required this.subtitle});
+
+  const _BenefitItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -214,8 +286,20 @@ class _BenefitItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-              Text(subtitle, style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+              ),
             ],
           ),
         ),
