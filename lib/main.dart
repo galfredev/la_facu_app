@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:la_facu/core/router/app_router.dart';
+import 'package:la_facu/core/theme/locale_provider.dart';
 import 'package:la_facu/core/theme/theme_provider.dart';
 
 import 'package:la_facu/core/services/notification_service.dart';
@@ -11,11 +12,11 @@ import 'package:intl/date_symbol_data_local.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es_ES', null);
-  
+
   // Inicializar Notificaciones
   final notificationService = NotificationService();
   await notificationService.init();
-  
+
   runApp(const ProviderScope(child: LaFacuApp()));
 }
 
@@ -25,9 +26,11 @@ class LaFacuApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
     final platformBrightness =
         WidgetsBinding.instance.platformDispatcher.platformBrightness;
-    final isDark = themeMode == ThemeMode.dark ||
+    final isDark =
+        themeMode == ThemeMode.dark ||
         (themeMode == ThemeMode.system &&
             platformBrightness == Brightness.dark);
 
@@ -35,8 +38,12 @@ class LaFacuApp extends ConsumerWidget {
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        systemNavigationBarColor: isDark ? AppColors.surface : AppColors.lightSurface,
-        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        systemNavigationBarColor: isDark
+            ? AppColors.surface
+            : AppColors.lightSurface,
+        systemNavigationBarIconBrightness: isDark
+            ? Brightness.light
+            : Brightness.dark,
       ),
       child: MaterialApp.router(
         title: 'La Facu',
@@ -44,6 +51,8 @@ class LaFacuApp extends ConsumerWidget {
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: themeMode,
+        locale: locale,
+        supportedLocales: const [Locale('es'), Locale('en')],
         routerConfig: appRouter,
       ),
     );

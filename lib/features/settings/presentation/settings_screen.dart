@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/auth/google_auth_service.dart';
 import 'package:la_facu/core/services/google_calendar_service.dart';
 import 'package:la_facu/core/services/notification_service.dart';
+import 'package:la_facu/core/theme/locale_provider.dart';
 import 'package:la_facu/core/theme/theme_provider.dart';
 import 'package:la_facu/data/local_db/isar_service.dart';
 import 'package:la_facu/data/local_db/models/user_model.dart';
@@ -23,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final googleUser = ref.watch(googleAuthProvider);
     final userAsync = ref.watch(userRepositoryProvider);
+    final locale = ref.watch(localeProvider);
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -35,7 +37,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
               Text(
-                'Configuración',
+                'ConfiguraciÃƒÂ³n',
                 style: Theme.of(context).textTheme.displayMedium,
               ).animate().fadeIn().slideX(begin: -0.05),
               const SizedBox(height: 24),
@@ -106,7 +108,9 @@ class SettingsScreen extends ConsumerWidget {
                           await notifier.logout();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sesión cerrada')),
+                              const SnackBar(
+                                content: Text('SesiÃƒÂ³n cerrada'),
+                              ),
                             );
                           }
                         }
@@ -115,7 +119,7 @@ class SettingsScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'No se pudo completar la conexión con Google: ',
+                                'No se pudo completar la conexiÃƒÂ³n con Google: $e',
                               ),
                               backgroundColor: Colors.orangeAccent,
                             ),
@@ -165,8 +169,8 @@ class SettingsScreen extends ConsumerWidget {
                         : Icons.light_mode_rounded,
                     label: 'Tema',
                     subtitle: isDark
-                        ? 'Modo oscuro (enfocado)'
-                        : 'Modo claro (limpio)',
+                        ? 'Modo Oscuro (Enfocado)'
+                        : 'Modo Claro (Limpio)',
                     color: isDark
                         ? AppColors.accentSage
                         : AppColors.primaryBlue,
@@ -179,6 +183,32 @@ class SettingsScreen extends ConsumerWidget {
                     ),
                     onTap: () {
                       ref.read(themeModeProvider.notifier).toggleTheme();
+                    },
+                  ),
+                  _SettingsTile(
+                    icon: Icons.translate_rounded,
+                    label: 'Idioma',
+                    subtitle: locale.languageCode == 'en'
+                        ? 'English'
+                        : 'Español',
+                    color: AppColors.accentAmber,
+                    trailing: SegmentedButton<Locale>(
+                      segments: const [
+                        ButtonSegment(value: Locale('es'), label: Text('ES')),
+                        ButtonSegment(value: Locale('en'), label: Text('EN')),
+                      ],
+                      selected: {locale},
+                      onSelectionChanged: (selection) {
+                        ref
+                            .read(localeProvider.notifier)
+                            .setLocale(selection.first);
+                      },
+                    ),
+                    onTap: () {
+                      final nextLocale = locale.languageCode == 'en'
+                          ? const Locale('es')
+                          : const Locale('en');
+                      ref.read(localeProvider.notifier).setLocale(nextLocale);
                     },
                   ),
                 ],
@@ -196,9 +226,9 @@ class SettingsScreen extends ConsumerWidget {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('¿Borrar todos los datos?'),
+                          title: const Text('Ã‚Â¿Borrar todos los datos?'),
                           content: const Text(
-                            'Esta acción eliminará todas las materias, tareas y horarios localmente. No se puede deshacer.',
+                            'Esta acciÃƒÂ³n eliminarÃƒÂ¡ todas las materias, tareas y horarios localmente. No se puede deshacer.',
                           ),
                           actions: [
                             TextButton(
@@ -345,7 +375,7 @@ class _GoogleConnectionCard extends StatelessWidget {
                 Text(
                   connected
                       ? 'Perfil activo y listo para sincronizar calendario.'
-                      : 'ActivÃƒÆ’Ã‚Â¡ tu cuenta para ver perfil y sincronizaciÃƒÆ’Ã‚Â³n.',
+                      : 'ActivÃƒÂ¡ tu cuenta para ver perfil y sincronizaciÃƒÂ³n.',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontSize: 12),
