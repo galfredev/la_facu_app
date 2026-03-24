@@ -169,6 +169,17 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
+                  if (googleUser != null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: _GoogleConnectedCard(
+                        googleUser: googleUser,
+                        user: userAsync.value,
+                      ),
+                    ).animate().fadeIn(delay: 320.ms).slideY(begin: 0.06),
+
+                  if (googleUser != null) const SizedBox(height: 24),
+
                   // ----- HOY EN LA FACU (MAIN FOCUS) -----
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -461,6 +472,123 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 40),
                 ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoogleConnectedCard extends StatelessWidget {
+  const _GoogleConnectedCard({required this.googleUser, required this.user});
+
+  final UserInfo googleUser;
+  final UserModel? user;
+
+  @override
+  Widget build(BuildContext context) {
+    final career = user?.career?.trim() ?? '';
+    final university = user?.university?.trim() ?? '';
+    final needsProfileDetails =
+        career.isEmpty ||
+        career == 'Mi Carrera' ||
+        university.isEmpty ||
+        university == 'Mi Universidad';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primaryBlue.withValues(alpha: 0.14),
+            AppColors.accentSage.withValues(alpha: 0.08),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: AppColors.primaryBlue.withValues(alpha: 0.18),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: AppColors.primaryBlue.withValues(alpha: 0.16),
+                backgroundImage: googleUser.photoUrl != null
+                    ? NetworkImage(googleUser.photoUrl!)
+                    : null,
+                child: googleUser.photoUrl == null
+                    ? const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.primaryBlue,
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Google conectado',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      googleUser.email,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryBlue.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Text(
+                  'Activo',
+                  style: AppTheme.monoTextStyle.copyWith(
+                    fontSize: 10,
+                    color: AppColors.primaryBlue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            needsProfileDetails
+                ? 'Tu cuenta ya esta lista. Completa carrera, universidad y descripcion desde tu perfil para terminar de personalizar la app.'
+                : 'Tu cuenta ya esta conectada y la app puede usar tu perfil de Google como referencia visual.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.color?.withValues(alpha: 0.84),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: FilledButton.tonalIcon(
+              onPressed: () => context.go('/settings'),
+              icon: const Icon(Icons.edit_rounded),
+              label: Text(
+                needsProfileDetails ? 'Completar perfil' : 'Ver perfil',
               ),
             ),
           ),

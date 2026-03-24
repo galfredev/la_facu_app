@@ -23,6 +23,7 @@ class GoogleAuth extends _$GoogleAuth {
       '453274240916-aujidgi1oemn2io0774lcd1ovatdfjmq.apps.googleusercontent.com';
 
   static const _scopes = [
+    'openid',
     'email',
     'profile',
     'https://www.googleapis.com/auth/calendar.events',
@@ -228,24 +229,36 @@ class GoogleAuth extends _$GoogleAuth {
       );
 
       if (response.statusCode != 200) {
+        debugPrint(
+          'Error intercambiando code por token: ${response.statusCode} ${response.body}',
+        );
         return null;
       }
 
       final data = jsonDecode(response.body) as Map<String, dynamic>;
       final accessToken = data['access_token'] as String? ?? '';
+      final idToken = data['id_token'] as String?;
+
+      final userFromIdToken = _userInfoFromIdToken(idToken, accessToken);
+      if (userFromIdToken != null) {
+        return userFromIdToken;
+      }
 
       final userResponse = await http.get(
-        Uri.parse('https://www.googleapis.com/oauth2/v2/userinfo'),
+        Uri.parse('https://openidconnect.googleapis.com/v1/userinfo'),
         headers: {'Authorization': 'Bearer $accessToken'},
       );
 
       if (userResponse.statusCode != 200) {
+        debugPrint(
+          'Error obteniendo userinfo: ${userResponse.statusCode} ${userResponse.body}',
+        );
         return null;
       }
 
       final userData = jsonDecode(userResponse.body) as Map<String, dynamic>;
       return UserInfo(
-        id: userData['id'] as String? ?? '',
+        id: userData['id'] as String? ?? userData['sub'] as String? ?? '',
         email: userData['email'] as String? ?? '',
         displayName: userData['name'] as String? ?? '',
         photoUrl: userData['picture'] as String?,
@@ -303,6 +316,35 @@ class GoogleAuth extends _$GoogleAuth {
     final bytes = sha256.convert(utf8.encode(codeVerifier)).bytes;
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
+
+  UserInfo? _userInfoFromIdToken(String? idToken, String accessToken) {
+    if (idToken == null || idToken.isEmpty) {
+      return null;
+    }
+
+    try {
+      final parts = idToken.split('.');
+      if (parts.length < 2) {
+        return null;
+      }
+
+      final normalizedPayload = base64Url.normalize(parts[1]);
+      final payload =
+          jsonDecode(utf8.decode(base64Url.decode(normalizedPayload)))
+              as Map<String, dynamic>;
+
+      return UserInfo(
+        id: payload['sub'] as String? ?? '',
+        email: payload['email'] as String? ?? '',
+        displayName: payload['name'] as String? ?? '',
+        photoUrl: payload['picture'] as String?,
+        accessToken: accessToken,
+      );
+    } catch (e) {
+      debugPrint('No se pudo parsear el id_token: $e');
+      return null;
+    }
+  }
 }
 
 Future<bool> _openBrowser(String url) async {
@@ -334,12 +376,12 @@ Future<bool> _openBrowser(String url) async {
 
 String _buildOAuthResponse(bool success) {
   final title = success
-      ? 'La Facu: mantenete enfocado'
-      : 'No pudimos conectar tu cuenta';
-  final color = success ? '#34d399' : '#f87171';
+      ? 'Ya podes cerrar esta pestana'
+      : 'No pudimos verificar tu cuenta';
+  final color = success ? '#dbe7ff' : '#fda4af';
   final message = success
-      ? 'Ya podés cerrar esta pestaña. Tu cuenta fue verificada exitosamente con Google.'
-      : 'Volvé a la app e intentá de nuevo.';
+      ? 'La conexion con Google se completo correctamente. La app va a refrescar tu cuenta automaticamente.'
+      : 'Volve a la app e intenta de nuevo.';
 
   return '''
 <!DOCTYPE html>
@@ -350,19 +392,12 @@ String _buildOAuthResponse(bool success) {
   <title>La Facu</title>
 </head>
 <body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.35), transparent 32%), radial-gradient(circle at bottom left, rgba(16,185,129,0.22), transparent 26%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
-  <div style="width:min(560px, calc(100vw - 32px)); padding:32px; border-radius:28px; background:rgba(15,23,42,0.82); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(14px);">
-    <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
-      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #6366f1, #10b981); display:flex; align-items:center; justify-content:center; color:white; font-size:15px; font-weight:800; letter-spacing:1px;">OK</div>
-      <div>
-        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8;">La Facu: mantenete enfocado</div>
-        <h2 style="margin:4px 0 0; color:$color; font-size:28px; line-height:1.1;">$title</h2>
-      </div>
-    </div>
-    <p style="margin:0 0 14px; color:#dbe7ff; font-size:16px; line-height:1.6;">$message</p>
-    <div style="padding:14px 16px; border-radius:18px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.16); color:#c7d8ff; font-size:14px;">
-      Si la app ya está abierta, vas a ver el refresh con tu cuenta conectada en unos segundos.
-    </div>
-    <p style="margin:16px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.6px;">GalfreDev</p>
+  <div style="width:min(520px, calc(100vw - 32px)); padding:36px 32px; border-radius:28px; background:rgba(15,23,42,0.84); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(14px); text-align:center;">
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:4px; color:#94a3b8;">LA FACU</div>
+    <h1 style="margin:14px 0 10px; color:#f8fafc; font-size:40px; line-height:1; font-weight:800; letter-spacing:-1px;">mantenete enfocado</h1>
+    <p style="margin:0; color:$color; font-size:20px; font-weight:700; line-height:1.35;">$title</p>
+    <p style="margin:16px auto 0; max-width:360px; color:#c7d8ff; font-size:15px; line-height:1.7;">$message</p>
+    <p style="margin:18px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.4px;">GalfreDev</p>
   </div>
   <script>
     setTimeout(() => window.close(), 2200);

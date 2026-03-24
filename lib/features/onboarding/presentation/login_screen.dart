@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:la_facu/core/auth/google_auth_service.dart';
+import 'package:la_facu/core/services/google_calendar_api.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:la_facu/features/settings/data/user_repository.dart';
 
@@ -28,16 +29,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             .read(userRepositoryProvider.notifier)
             .syncGoogleProfile(account);
         ref.invalidate(userRepositoryProvider);
+        ref.invalidate(calendarApiProvider);
         setState(() => _showSuccess = true);
         await Future.delayed(const Duration(milliseconds: 900));
         if (mounted) {
           context.go('/');
         }
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'No pudimos completar la conexion con Google. Intenta de nuevo.',
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al iniciar sesi\u00f3n: ')),
+          SnackBar(content: Text('Error al iniciar sesi\u00f3n: $e')),
         );
       }
     } finally {

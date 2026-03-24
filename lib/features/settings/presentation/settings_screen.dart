@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:la_facu/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:la_facu/core/auth/google_auth_service.dart';
+import 'package:la_facu/core/services/google_calendar_api.dart';
 import 'package:la_facu/core/services/google_calendar_service.dart';
 import 'package:la_facu/core/services/notification_service.dart';
 import 'package:la_facu/core/theme/theme_provider.dart';
@@ -62,6 +63,7 @@ class SettingsScreen extends ConsumerWidget {
                         .read(userRepositoryProvider.notifier)
                         .syncGoogleProfile(account);
                     ref.invalidate(userRepositoryProvider);
+                    ref.invalidate(calendarApiProvider);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('Conectado como ${account.email}'),
@@ -103,6 +105,7 @@ class SettingsScreen extends ConsumerWidget {
                                 .read(userRepositoryProvider.notifier)
                                 .syncGoogleProfile(account);
                             ref.invalidate(userRepositoryProvider);
+                            ref.invalidate(calendarApiProvider);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -126,7 +129,7 @@ class SettingsScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'No se pudo completar la conexi\u00f3n con Google: ',
+                                'No se pudo completar la conexi\u00f3n con Google: $e',
                               ),
                               backgroundColor: Colors.orangeAccent,
                             ),

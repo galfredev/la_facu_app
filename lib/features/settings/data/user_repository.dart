@@ -17,7 +17,7 @@ class UserRepository extends _$UserRepository {
       final newUser = UserModel(
         name: 'Nuevo Estudiante',
         email: 'estudiante@lafacu.app',
-        bio: '¡Hola! Estoy usando La Facu para enfocarme en mis estudios.',
+        bio: 'Hola. Estoy usando La Facu para enfocarme en mis estudios.',
         university: 'Mi Universidad',
         career: 'Mi Carrera',
         notificationsEnabled: true,
@@ -40,7 +40,7 @@ class UserRepository extends _$UserRepository {
     final shouldRefreshBio =
         currentBio.isEmpty ||
         currentBio ==
-            'Â¡Hola! Estoy usando La Facu para enfocarme en mis estudios.';
+            'Hola. Estoy usando La Facu para enfocarme en mis estudios.';
 
     user
       ..name = account.displayName.isNotEmpty ? account.displayName : user.name

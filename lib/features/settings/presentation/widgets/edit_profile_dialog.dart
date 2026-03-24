@@ -107,7 +107,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
               icon: Icons.person_outline_rounded,
             ),
             _buildField(
-              label: 'Descripción / Bio',
+              label: 'Descripcion / Bio',
               controller: _bioController,
               icon: Icons.info_outline_rounded,
               maxLines: 2,
