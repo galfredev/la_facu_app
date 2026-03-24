@@ -33,7 +33,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error al iniciar sesión: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error al iniciar sesiÃ³n: $e')));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: 12),
                   Text(
-                    'Tu asistente académico inteligente',
+                    'Tu asistente acadÃ©mico inteligente',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
@@ -145,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Benefits Section
                   _BenefitItem(
                     icon: Icons.sync_rounded,
-                    title: 'Sincronización total',
+                    title: 'SincronizaciÃ³n total',
                     subtitle: 'Toda tu cursada conectada con Google Calendar.',
                   ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
 
@@ -155,15 +155,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     icon: Icons.notifications_active_rounded,
                     title: 'Notificaciones inteligentes',
                     subtitle:
-                        'Alertas automÃ¡ticas para que no se te pase nada.',
+                        'Alertas automÃƒÂ¡ticas para que no se te pase nada.',
                   ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
 
                   const SizedBox(height: 20),
 
                   _BenefitItem(
                     icon: Icons.auto_awesome_rounded,
-                    title: 'Personalización premium',
-                    subtitle: 'Diseño adaptado a tu estilo de estudio.',
+                    title: 'PersonalizaciÃ³n premium',
+                    subtitle: 'DiseÃ±o adaptado a tu estilo de estudio.',
                   ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1),
 
                   const Spacer(),
@@ -277,7 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: 12),
                   Text(
-                    'Galfred Dev',
+                    'GalfreDev',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: AppColors.textMuted.withValues(alpha: 0.7),
                       letterSpacing: 1.4,

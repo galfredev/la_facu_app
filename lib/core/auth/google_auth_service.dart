@@ -333,11 +333,11 @@ Future<bool> _openBrowser(String url) async {
 }
 
 String _buildOAuthResponse(bool success) {
-  final title = success ? 'SesiÃ³n conectada' : 'No pudimos conectar';
+  final title = success ? 'SesiÃƒÂ³n conectada' : 'No pudimos conectar';
   final color = success ? '#2e7d32' : '#d32f2f';
   final message = success
-      ? 'Ya podés volver a La Facu. Esta pestaña se puede cerrar.'
-      : 'VolvÃ© a la app e intentÃ¡ de nuevo.';
+      ? 'Ya podÃ©s volver a La Facu. Esta pestaÃ±a se puede cerrar.'
+      : 'VolvÃƒÂ© a la app e intentÃƒÂ¡ de nuevo.';
 
   return '''
 <!DOCTYPE html>
@@ -350,14 +350,14 @@ String _buildOAuthResponse(bool success) {
 <body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f7f9ff 0%,#eef4ff 100%); font-family: Inter, Arial, sans-serif;">
   <div style="width:min(560px, calc(100vw - 32px)); padding:32px; border-radius:28px; background:rgba(255,255,255,0.92); box-shadow:0 18px 60px rgba(27,78,163,0.12); border:1px solid rgba(46,125,50,0.08);">
     <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
-      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #1b74e4, #7fc8a9); display:flex; align-items:center; justify-content:center; color:white; font-size:22px;">Ã¢Å“â€œ</div>
+      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #1b74e4, #7fc8a9); display:flex; align-items:center; justify-content:center; color:white; font-size:22px;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“</div>
       <div>
-        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#5f6c82;">La Facu Ã‚Â· Google</div>
+        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#5f6c82;">La Facu Ãƒâ€šÃ‚Â· Google</div>
         <h2 style="margin:4px 0 0; color:$color; font-size:28px; line-height:1.1;">$title</h2>
       </div>
     </div>
     <p style="margin:0 0 10px; color:#304056; font-size:16px; line-height:1.6;">$message</p>
-    <p style="margin:0; color:#6b778c; font-size:13px;">Galfred Dev</p>
+    <p style="margin:0; color:#6b778c; font-size:13px;">GalfreDev</p>
   </div>
   <script>
     setTimeout(() => window.close(), 1200);

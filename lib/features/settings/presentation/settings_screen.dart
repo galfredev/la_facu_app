@@ -35,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
               Text(
-                'Configuración',
+                'ConfiguraciÃƒÂ³n',
                 style: Theme.of(context).textTheme.displayMedium,
               ).animate().fadeIn().slideX(begin: -0.05),
               const SizedBox(height: 24),
@@ -106,7 +106,9 @@ class SettingsScreen extends ConsumerWidget {
                           await notifier.logout();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Sesión cerrada')),
+                              const SnackBar(
+                                content: Text('SesiÃƒÂ³n cerrada'),
+                              ),
                             );
                           }
                         }
@@ -115,7 +117,7 @@ class SettingsScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'No se pudo completar la conexión con Google: $e',
+                                'No se pudo completar la conexiÃƒÂ³n con Google: $e',
                               ),
                               backgroundColor: Colors.orangeAccent,
                             ),
@@ -196,9 +198,9 @@ class SettingsScreen extends ConsumerWidget {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('¿Borrar todos los datos?'),
+                          title: const Text('Ã‚Â¿Borrar todos los datos?'),
                           content: const Text(
-                            'Esta acción eliminará todas las materias, tareas y horarios localmente. No se puede deshacer.',
+                            'Esta acciÃƒÂ³n eliminarÃƒÂ¡ todas las materias, tareas y horarios localmente. No se puede deshacer.',
                           ),
                           actions: [
                             TextButton(
@@ -264,7 +266,7 @@ class SettingsScreen extends ConsumerWidget {
                   _SettingsTile(
                     icon: Icons.info_rounded,
                     label: 'La Facu',
-                    subtitle: 'v1.0.0 â€¢ by GalfreDev',
+                    subtitle: 'v1.0.0 • GalfreDev',
                     color: AppColors.textMuted,
                   ),
                 ],
@@ -345,7 +347,7 @@ class _GoogleConnectionCard extends StatelessWidget {
                 Text(
                   connected
                       ? 'Perfil activo y listo para sincronizar calendario.'
-                      : 'Activá tu cuenta para ver perfil y sincronización.',
+                      : 'ActivÃƒÂ¡ tu cuenta para ver perfil y sincronizaciÃƒÂ³n.',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontSize: 12),
