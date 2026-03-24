@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +17,7 @@ class GoogleAuth extends _$GoogleAuth {
   UserInfo? _currentUser;
   bool _hasWarnedMissingCredentials = false;
 
-  static const _clientId = String.fromEnvironment('GOOGLE_CLIENT_ID');
-  static const _clientSecret = String.fromEnvironment('GOOGLE_CLIENT_SECRET');
+  static const _clientId = '42417471798-ch2un4767qmf7vsq2hi2v58tbv0a07qi.apps.googleusercontent.com';
 
   static const _scopes = [
     'email',
@@ -58,6 +60,7 @@ class GoogleAuth extends _$GoogleAuth {
       final userInfo = await _getUserInfoFromCode(
         authResult.code,
         authResult.redirectUri,
+        authResult.codeVerifier,
       );
 
       if (userInfo != null) {
@@ -73,12 +76,14 @@ class GoogleAuth extends _$GoogleAuth {
   }
 
   Future<UserInfo?> _authenticateWithGoogle() async {
-    if (_clientId.isEmpty || _clientSecret.isEmpty) {
+    if (_clientId.isEmpty) {
       _warnMissingCredentials();
       return null;
     }
 
     const redirectUri = 'la-facu://oauth2callback';
+    final codeVerifier = _generateCodeVerifier();
+    final codeChallenge = _codeChallengeS256(codeVerifier);
 
     final state = DateTime.now().millisecondsSinceEpoch.toString();
     final authUrl = Uri.parse(
@@ -89,7 +94,9 @@ class GoogleAuth extends _$GoogleAuth {
       '&scope=${Uri.encodeComponent(_scopes.join(' '))}'
       '&state=$state'
       '&access_type=offline'
-      '&prompt=consent',
+      '&prompt=consent'
+      '&code_challenge=${Uri.encodeComponent(codeChallenge)}'
+      '&code_challenge_method=S256',
     );
 
     try {
@@ -100,7 +107,7 @@ class GoogleAuth extends _$GoogleAuth {
       );
 
       if (response != null && response.isNotEmpty) {
-        return _getUserInfoFromCode(response, redirectUri);
+        return _getUserInfoFromCode(response, redirectUri, codeVerifier);
       }
     } catch (e) {
       debugPrint('Error en autenticacion: $e');
@@ -110,7 +117,7 @@ class GoogleAuth extends _$GoogleAuth {
   }
 
   Future<_DesktopAuthResult?> _getAuthorizationCodeDesktop() async {
-    if (_clientId.isEmpty || _clientSecret.isEmpty) {
+    if (_clientId.isEmpty) {
       _warnMissingCredentials();
       return null;
     }
@@ -121,6 +128,8 @@ class GoogleAuth extends _$GoogleAuth {
       shared: true,
     );
     final redirectUri = 'http://localhost:${server.port}/callback';
+    final codeVerifier = _generateCodeVerifier();
+    final codeChallenge = _codeChallengeS256(codeVerifier);
     final state = DateTime.now().millisecondsSinceEpoch.toString();
 
     final authUrl = Uri(
@@ -135,6 +144,8 @@ class GoogleAuth extends _$GoogleAuth {
         'state': state,
         'access_type': 'offline',
         'prompt': 'consent',
+        'code_challenge': codeChallenge,
+        'code_challenge_method': 'S256',
       },
     );
 
@@ -167,7 +178,11 @@ class GoogleAuth extends _$GoogleAuth {
             completer.complete(
               code == null
                   ? null
-                  : _DesktopAuthResult(code: code, redirectUri: redirectUri),
+                  : _DesktopAuthResult(
+                      code: code,
+                      redirectUri: redirectUri,
+                      codeVerifier: codeVerifier,
+                    ),
             );
           }
 
@@ -194,6 +209,7 @@ class GoogleAuth extends _$GoogleAuth {
   Future<UserInfo?> _getUserInfoFromCode(
     String authCode,
     String redirectUri,
+    String codeVerifier,
   ) async {
     try {
       final response = await http.post(
@@ -201,10 +217,10 @@ class GoogleAuth extends _$GoogleAuth {
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         body: {
           'client_id': _clientId,
-          'client_secret': _clientSecret,
           'code': authCode,
           'grant_type': 'authorization_code',
           'redirect_uri': redirectUri,
+          'code_verifier': codeVerifier,
         },
       );
 
@@ -265,6 +281,17 @@ class GoogleAuth extends _$GoogleAuth {
 
     _hasWarnedMissingCredentials = true;
     debugPrint('Faltan credenciales de Google para autenticacion.');
+  }
+
+  String _generateCodeVerifier() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(32, (_) => random.nextInt(256));
+    return base64UrlEncode(bytes).replaceAll('=', '');
+  }
+
+  String _codeChallengeS256(String codeVerifier) {
+    final bytes = sha256.convert(utf8.encode(codeVerifier)).bytes;
+    return base64UrlEncode(bytes).replaceAll('=', '');
   }
 }
 
@@ -342,8 +369,10 @@ class _DesktopAuthResult {
   const _DesktopAuthResult({
     required this.code,
     required this.redirectUri,
+    required this.codeVerifier,
   });
 
   final String code;
   final String redirectUri;
+  final String codeVerifier;
 }
