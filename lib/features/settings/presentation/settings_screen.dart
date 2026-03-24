@@ -35,7 +35,7 @@ class SettingsScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
               Text(
-                'ConfiguraciÃƒÂ³n',
+                'Configuración',
                 style: Theme.of(context).textTheme.displayMedium,
               ).animate().fadeIn().slideX(begin: -0.05),
               const SizedBox(height: 24),
@@ -106,9 +106,7 @@ class SettingsScreen extends ConsumerWidget {
                           await notifier.logout();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('SesiÃƒÂ³n cerrada'),
-                              ),
+                              const SnackBar(content: Text('Sesión cerrada')),
                             );
                           }
                         }
@@ -117,7 +115,7 @@ class SettingsScreen extends ConsumerWidget {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                'No se pudo completar la conexiÃƒÂ³n con Google: $e',
+                                'No se pudo completar la conexión con Google: ',
                               ),
                               backgroundColor: Colors.orangeAccent,
                             ),
@@ -167,8 +165,8 @@ class SettingsScreen extends ConsumerWidget {
                         : Icons.light_mode_rounded,
                     label: 'Tema',
                     subtitle: isDark
-                        ? 'Modo Oscuro (Enfocado)'
-                        : 'Modo Claro (Limpio)',
+                        ? 'Modo oscuro (enfocado)'
+                        : 'Modo claro (limpio)',
                     color: isDark
                         ? AppColors.accentSage
                         : AppColors.primaryBlue,
@@ -198,9 +196,9 @@ class SettingsScreen extends ConsumerWidget {
                       final confirm = await showDialog<bool>(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          title: const Text('Ã‚Â¿Borrar todos los datos?'),
+                          title: const Text('¿Borrar todos los datos?'),
                           content: const Text(
-                            'Esta acciÃƒÂ³n eliminarÃƒÂ¡ todas las materias, tareas y horarios localmente. No se puede deshacer.',
+                            'Esta acción eliminará todas las materias, tareas y horarios localmente. No se puede deshacer.',
                           ),
                           actions: [
                             TextButton(
@@ -347,7 +345,7 @@ class _GoogleConnectionCard extends StatelessWidget {
                 Text(
                   connected
                       ? 'Perfil activo y listo para sincronizar calendario.'
-                      : 'ActivÃƒÂ¡ tu cuenta para ver perfil y sincronizaciÃƒÂ³n.',
+                      : 'ActivÃƒÆ’Ã‚Â¡ tu cuenta para ver perfil y sincronizaciÃƒÆ’Ã‚Â³n.',
                   style: Theme.of(
                     context,
                   ).textTheme.bodyMedium?.copyWith(fontSize: 12),
