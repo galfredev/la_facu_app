@@ -427,11 +427,7 @@ class GoogleAuth extends _$GoogleAuth {
 Future<bool> _openBrowser(String url) async {
   try {
     if (Platform.isWindows) {
-      await Process.start('powershell', [
-        '-NoProfile',
-        '-Command',
-        'Start-Process -FilePath "${url.replaceAll('"', '`"')}"',
-      ]);
+      await Process.start('rundll32.exe', ['url.dll,FileProtocolHandler', url]);
       return true;
     }
 
