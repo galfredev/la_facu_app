@@ -36,10 +36,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           context.go('/');
         }
       } else if (mounted) {
+        final failure = ref.read(googleAuthProvider.notifier).lastAuthFailure;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'No pudimos completar la conexion con Google. Intenta de nuevo.',
+              failure == null
+                  ? 'No pudimos completar la conexion con Google. Intenta de nuevo.'
+                  : 'No pudimos completar la conexion con Google: $failure',
             ),
           ),
         );

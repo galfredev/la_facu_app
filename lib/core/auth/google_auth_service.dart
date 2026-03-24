@@ -18,6 +18,7 @@ class GoogleAuth extends _$GoogleAuth {
   UserInfo? _currentUser;
   bool _hasWarnedMissingCredentials = false;
   bool _didRestoreSession = false;
+  String? _lastAuthFailure;
 
   static const _desktopClientId =
       '453274240916-5jn4l3f4lu80mrolkk81ome1eojl3oml.apps.googleusercontent.com';
@@ -42,6 +43,7 @@ class GoogleAuth extends _$GoogleAuth {
   }
 
   Future<UserInfo?> login() async {
+    _lastAuthFailure = null;
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       return _signInDesktop();
     }
@@ -233,6 +235,9 @@ class GoogleAuth extends _$GoogleAuth {
       );
 
       if (response.statusCode != 200) {
+        await _setLastAuthFailure(
+          'token_exchange_failed ${response.statusCode}: ${response.body}',
+        );
         debugPrint(
           'Error intercambiando code por token: ${response.statusCode} ${response.body}',
         );
@@ -254,6 +259,9 @@ class GoogleAuth extends _$GoogleAuth {
       );
 
       if (userResponse.statusCode != 200) {
+        await _setLastAuthFailure(
+          'userinfo_failed ${userResponse.statusCode}: ${userResponse.body}',
+        );
         debugPrint(
           'Error obteniendo userinfo: ${userResponse.statusCode} ${userResponse.body}',
         );
@@ -269,6 +277,7 @@ class GoogleAuth extends _$GoogleAuth {
         accessToken: accessToken,
       );
     } catch (e) {
+      await _setLastAuthFailure('userinfo_exception: $e');
       debugPrint('Error obteniendo userinfo: $e');
       return null;
     }
@@ -277,6 +286,7 @@ class GoogleAuth extends _$GoogleAuth {
   Future<void> logout() async {
     _currentUser = null;
     state = null;
+    _lastAuthFailure = null;
     await _clearSession();
   }
 
@@ -285,6 +295,7 @@ class GoogleAuth extends _$GoogleAuth {
   String? get userEmail => _currentUser?.email;
   String? get userName => _currentUser?.displayName;
   String? get userAvatar => _currentUser?.photoUrl;
+  String? get lastAuthFailure => _lastAuthFailure;
 
   Future<Map<String, String>> get authHeaders async {
     final accessToken = _currentUser?.accessToken;
@@ -364,6 +375,24 @@ class GoogleAuth extends _$GoogleAuth {
     await prefs.remove('google_user_access_token');
   }
 
+  Future<void> _setLastAuthFailure(String message) async {
+    _lastAuthFailure = message;
+    debugPrint('Google auth failure: $message');
+
+    try {
+      final logFile = File(
+        '${Directory.systemTemp.path}${Platform.pathSeparator}la_facu_google_auth.log',
+      );
+      final timestamp = DateTime.now().toIso8601String();
+      await logFile.writeAsString(
+        '[$timestamp] $message\n',
+        mode: FileMode.append,
+      );
+    } catch (_) {
+      // Best-effort debug trace only.
+    }
+  }
+
   UserInfo? _userInfoFromIdToken(String? idToken, String accessToken) {
     if (idToken == null || idToken.isEmpty) {
       return null;
@@ -423,12 +452,12 @@ Future<bool> _openBrowser(String url) async {
 
 String _buildOAuthResponse(bool success) {
   final title = success
-      ? 'Verificacion completada'
-      : 'No pudimos verificar tu cuenta';
+      ? 'Conexion completada'
+      : 'No pudimos completar la conexion';
   final accent = success ? '#10b981' : '#fb7185';
   final message = success
       ? 'La verificacion con Google se realizo correctamente. Ya podes cerrar esta pestana y volver a la app.'
-      : 'Volve a la app e intenta de nuevo.';
+      : 'Google no termino de validar la sesion en la app. Volve y reintenta.';
 
   return '''
 <!DOCTYPE html>
