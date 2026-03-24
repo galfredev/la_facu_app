@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'google_auth_service.g.dart';
 
@@ -16,6 +17,7 @@ part 'google_auth_service.g.dart';
 class GoogleAuth extends _$GoogleAuth {
   UserInfo? _currentUser;
   bool _hasWarnedMissingCredentials = false;
+  bool _didRestoreSession = false;
 
   static const _desktopClientId =
       '453274240916-5jn4l3f4lu80mrolkk81ome1eojl3oml.apps.googleusercontent.com';
@@ -31,7 +33,13 @@ class GoogleAuth extends _$GoogleAuth {
   ];
 
   @override
-  UserInfo? build() => _currentUser;
+  UserInfo? build() {
+    if (!_didRestoreSession) {
+      _didRestoreSession = true;
+      unawaited(_restoreSession());
+    }
+    return _currentUser;
+  }
 
   Future<UserInfo?> login() async {
     if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
@@ -46,6 +54,7 @@ class GoogleAuth extends _$GoogleAuth {
       if (result != null) {
         _currentUser = result;
         state = _currentUser;
+        await _persistSession(result);
       }
       return _currentUser;
     } catch (e) {
@@ -70,6 +79,7 @@ class GoogleAuth extends _$GoogleAuth {
       if (userInfo != null) {
         _currentUser = userInfo;
         state = userInfo;
+        await _persistSession(userInfo);
       }
 
       return userInfo;
@@ -273,6 +283,7 @@ class GoogleAuth extends _$GoogleAuth {
   Future<void> logout() async {
     _currentUser = null;
     state = null;
+    await _clearSession();
   }
 
   bool get isAuthenticated => _currentUser != null;
@@ -315,6 +326,48 @@ class GoogleAuth extends _$GoogleAuth {
   String _codeChallengeS256(String codeVerifier) {
     final bytes = sha256.convert(utf8.encode(codeVerifier)).bytes;
     return base64UrlEncode(bytes).replaceAll('=', '');
+  }
+
+  Future<void> _persistSession(UserInfo user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('google_user_id', user.id);
+    await prefs.setString('google_user_email', user.email);
+    await prefs.setString('google_user_name', user.displayName);
+    await prefs.setString('google_user_photo', user.photoUrl ?? '');
+    await prefs.setString('google_user_access_token', user.accessToken ?? '');
+  }
+
+  Future<void> _restoreSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('google_user_email') ?? '';
+    if (email.isEmpty) {
+      return;
+    }
+
+    final restoredUser = UserInfo(
+      id: prefs.getString('google_user_id') ?? '',
+      email: email,
+      displayName: prefs.getString('google_user_name') ?? '',
+      photoUrl: (prefs.getString('google_user_photo') ?? '').trim().isEmpty
+          ? null
+          : prefs.getString('google_user_photo'),
+      accessToken:
+          (prefs.getString('google_user_access_token') ?? '').trim().isEmpty
+          ? null
+          : prefs.getString('google_user_access_token'),
+    );
+
+    _currentUser = restoredUser;
+    state = restoredUser;
+  }
+
+  Future<void> _clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('google_user_id');
+    await prefs.remove('google_user_email');
+    await prefs.remove('google_user_name');
+    await prefs.remove('google_user_photo');
+    await prefs.remove('google_user_access_token');
   }
 
   UserInfo? _userInfoFromIdToken(String? idToken, String accessToken) {
@@ -378,7 +431,7 @@ String _buildOAuthResponse(bool success) {
   final title = success
       ? 'Ya podes cerrar esta pestana'
       : 'No pudimos verificar tu cuenta';
-  final color = success ? '#dbe7ff' : '#fda4af';
+  final accent = success ? '#6366f1' : '#fb7185';
   final message = success
       ? 'La conexion con Google se completo correctamente. La app va a refrescar tu cuenta automaticamente.'
       : 'Volve a la app e intenta de nuevo.';
@@ -391,13 +444,17 @@ String _buildOAuthResponse(bool success) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Facu</title>
 </head>
-<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.35), transparent 32%), radial-gradient(circle at bottom left, rgba(16,185,129,0.22), transparent 26%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
-  <div style="width:min(520px, calc(100vw - 32px)); padding:36px 32px; border-radius:28px; background:rgba(15,23,42,0.84); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(14px); text-align:center;">
-    <div style="font-size:12px; text-transform:uppercase; letter-spacing:4px; color:#94a3b8;">LA FACU</div>
-    <h1 style="margin:14px 0 10px; color:#f8fafc; font-size:40px; line-height:1; font-weight:800; letter-spacing:-1px;">mantenete enfocado</h1>
-    <p style="margin:0; color:$color; font-size:20px; font-weight:700; line-height:1.35;">$title</p>
-    <p style="margin:16px auto 0; max-width:360px; color:#c7d8ff; font-size:15px; line-height:1.7;">$message</p>
-    <p style="margin:18px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.4px;">GalfreDev</p>
+<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.38), transparent 28%), radial-gradient(circle at bottom left, rgba(16,185,129,0.18), transparent 22%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
+  <div style="width:min(500px, calc(100vw - 32px)); padding:40px 32px; border-radius:32px; background:rgba(15,23,42,0.86); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(16px); text-align:center;">
+    <div style="width:74px; height:74px; margin:0 auto 22px; border-radius:24px; background:linear-gradient(135deg, rgba(99,102,241,0.95), rgba(16,185,129,0.9)); display:flex; align-items:center; justify-content:center; box-shadow:0 18px 38px rgba(99,102,241,0.26);">
+      <div style="width:28px; height:16px; border-left:4px solid white; border-bottom:4px solid white; transform:rotate(-45deg); margin-top:-4px;"></div>
+    </div>
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:4px; color:#94a3b8;">LA FACU</div>
+    <h1 style="margin:14px 0 0; color:#f8fafc; font-size:38px; line-height:1; font-weight:800; letter-spacing:-1px;">mantenete enfocado</h1>
+    <p style="margin:18px 0 0; color:#f8fafc; font-size:21px; font-weight:700; line-height:1.3;">$title</p>
+    <p style="margin:14px auto 0; max-width:360px; color:#c7d8ff; font-size:15px; line-height:1.7;">$message</p>
+    <div style="display:inline-flex; margin-top:18px; padding:10px 14px; border-radius:999px; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.18); color:$accent; font-size:12px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase;">Google verificado</div>
+    <p style="margin:22px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.4px;">GalfreDev</p>
   </div>
   <script>
     setTimeout(() => window.close(), 2200);
