@@ -333,11 +333,13 @@ Future<bool> _openBrowser(String url) async {
 }
 
 String _buildOAuthResponse(bool success) {
-  final title = success ? 'SesiÃƒÂ³n conectada' : 'No pudimos conectar';
-  final color = success ? '#2e7d32' : '#d32f2f';
+  final title = success
+      ? 'Conexion exitosa con Google'
+      : 'No pudimos conectar tu cuenta';
+  final color = success ? '#34d399' : '#f87171';
   final message = success
-      ? 'Ya podÃ©s volver a La Facu. Esta pestaÃ±a se puede cerrar.'
-      : 'VolvÃƒÂ© a la app e intentÃƒÂ¡ de nuevo.';
+      ? 'Ya podes cerrar esta pestana. La Facu esta actualizando tu espacio con la cuenta conectada.'
+      : 'Volve a la app e intenta de nuevo.';
 
   return '''
 <!DOCTYPE html>
@@ -347,20 +349,23 @@ String _buildOAuthResponse(bool success) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>La Facu</title>
 </head>
-<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg,#f7f9ff 0%,#eef4ff 100%); font-family: Inter, Arial, sans-serif;">
-  <div style="width:min(560px, calc(100vw - 32px)); padding:32px; border-radius:28px; background:rgba(255,255,255,0.92); box-shadow:0 18px 60px rgba(27,78,163,0.12); border:1px solid rgba(46,125,50,0.08);">
+<body style="margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at top right, rgba(99,102,241,0.35), transparent 32%), radial-gradient(circle at bottom left, rgba(16,185,129,0.22), transparent 26%), linear-gradient(180deg,#0f172a 0%,#111827 100%); font-family: Manrope, Segoe UI, Arial, sans-serif; color:#e5eefc;">
+  <div style="width:min(560px, calc(100vw - 32px)); padding:32px; border-radius:28px; background:rgba(15,23,42,0.82); box-shadow:0 18px 60px rgba(0,0,0,0.28); border:1px solid rgba(99,102,241,0.18); backdrop-filter: blur(14px);">
     <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
-      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #1b74e4, #7fc8a9); display:flex; align-items:center; justify-content:center; color:white; font-size:22px;">ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“</div>
+      <div style="width:52px; height:52px; border-radius:16px; background:linear-gradient(135deg, #6366f1, #10b981); display:flex; align-items:center; justify-content:center; color:white; font-size:15px; font-weight:800; letter-spacing:1px;">OK</div>
       <div>
-        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#5f6c82;">La Facu Ãƒâ€šÃ‚Â· Google</div>
-        <h2 style="margin:4px 0 0; color:$color; font-size:28px; line-height:1.1;">$title</h2>
+        <div style="font-size:13px; text-transform:uppercase; letter-spacing:2px; color:#94a3b8;">La Facu | Google</div>
+        <h2 style="margin:4px 0 0; color:; font-size:28px; line-height:1.1;"></h2>
       </div>
     </div>
-    <p style="margin:0 0 10px; color:#304056; font-size:16px; line-height:1.6;">$message</p>
-    <p style="margin:0; color:#6b778c; font-size:13px;">GalfreDev</p>
+    <p style="margin:0 0 14px; color:#dbe7ff; font-size:16px; line-height:1.6;"></p>
+    <div style="padding:14px 16px; border-radius:18px; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.16); color:#c7d8ff; font-size:14px;">
+      Si la app ya esta abierta, vas a ver el refresh con tu cuenta conectada en unos segundos.
+    </div>
+    <p style="margin:16px 0 0; color:#94a3b8; font-size:13px; letter-spacing:0.6px;">GalfreDev</p>
   </div>
   <script>
-    setTimeout(() => window.close(), 1200);
+    setTimeout(() => window.close(), 2200);
   </script>
 </body>
 </html>

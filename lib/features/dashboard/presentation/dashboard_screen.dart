@@ -28,7 +28,7 @@ class DashboardScreen extends ConsumerWidget {
     final googleUser = ref.watch(googleAuthProvider);
     final now = DateTime.now();
     final greeting = now.hour < 12
-        ? 'Buenos dƒÂ­as'
+        ? 'Buenos d\u00edas'
         : now.hour < 19
         ? 'Buenas tardes'
         : 'Buenas noches';
@@ -224,7 +224,7 @@ class DashboardScreen extends ConsumerWidget {
                                         (e) => _EventCard(
                                           title: e.subjectName,
                                           subtitle:
-                                              '${e.startTime} - ${e.endTime} ¢â‚¬Â¢ ${e.room}',
+                                              '${e.startTime} - ${e.endTime} \u2022 ${e.room}',
                                           color: Color(e.colorValue),
                                           icon: Icons.school_rounded,
                                           onTap: () => context.go('/schedule'),
@@ -261,7 +261,7 @@ class DashboardScreen extends ConsumerWidget {
                             icon: Icons.cloud_off_rounded,
                             title: 'Google desconectado',
                             subtitle:
-                                'Cuando conectes la cuenta, verás eventos relevantes acá.',
+                                'Cuando conectes la cuenta, ver\u00e1s eventos relevantes ac\u00e1.',
                           )
                         else
                           FutureBuilder(
@@ -293,7 +293,8 @@ class DashboardScreen extends ConsumerWidget {
                                   ...visibleEvents.map(
                                     (event) => _GoogleEventCard(
                                       title:
-                                          event.summary ?? 'Evento sin título',
+                                          event.summary ??
+                                          'Evento sin t\u00edtulo',
                                       subtitle: event.start?.dateTime != null
                                           ? DateFormat(
                                               'EEE d MMM, HH:mm',
@@ -301,13 +302,13 @@ class DashboardScreen extends ConsumerWidget {
                                             ).format(
                                               event.start!.dateTime!.toLocal(),
                                             )
-                                          : 'Evento de día completo',
+                                          : 'Evento de d\u00eda completo',
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   const _CalendarHintCard(
                                     icon: Icons.school_rounded,
-                                    title: 'Enfoque académico',
+                                    title: 'Enfoque acad\u00e9mico',
                                     subtitle:
                                         'Los eventos Google aparecen como contexto, pero la prioridad sigue siendo la facu.',
                                   ),
@@ -321,7 +322,7 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  // ----- ACCIONES RƒÂPIDAS (MODERN BAR) -----
+                  // ----- ACCIONES RÃPIDAS (MODERN BAR) -----
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -360,7 +361,7 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 40),
 
-                  // ----- PROGRESO ACADƒâ€°MICO -----
+                  // ----- PROGRESO ACADÃ‰MICO -----
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
@@ -406,14 +407,14 @@ class DashboardScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  // ----- PRƒâ€œXIMAS TAREAS -----
+                  // ----- PRÃ“XIMAS TAREAS -----
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Pendientes CrƒÂ­ticos',
+                          'Pendientes Cr\u00edticos',
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w800),
                         ),
@@ -438,7 +439,7 @@ class DashboardScreen extends ConsumerWidget {
                                 return _EventCard(
                                       title: t.title,
                                       subtitle:
-                                          '${t.subjectName} ¢â‚¬Â¢ ${DateFormat("d MMM").format(t.dueDate)}',
+                                          '${t.subjectName} \u2022 ${DateFormat("d MMM").format(t.dueDate)}',
                                       color: Color(t.colorValue),
                                       icon: _taskIcon(t.type),
                                       onTap: () => context.go('/tasks'),
@@ -563,7 +564,7 @@ class _EmptyHoyCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '‚¡DƒÂ­a Libre!',
+                  '\u00a1D\u00eda libre!',
                   style: Theme.of(
                     context,
                   ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),

@@ -31,9 +31,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error al iniciar sesiÃ³n: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al iniciar sesi\u00f3n: ')),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -133,7 +133,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   const SizedBox(height: 12),
                   Text(
-                    'Tu asistente acadÃ©mico inteligente',
+                    'Tu asistente acad\u00e9mico inteligente',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppColors.textSecondary,
@@ -145,7 +145,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Benefits Section
                   _BenefitItem(
                     icon: Icons.sync_rounded,
-                    title: 'SincronizaciÃ³n total',
+                    title: 'Sincronizaci\u00f3n total',
                     subtitle: 'Toda tu cursada conectada con Google Calendar.',
                   ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
 
@@ -155,15 +155,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     icon: Icons.notifications_active_rounded,
                     title: 'Notificaciones inteligentes',
                     subtitle:
-                        'Alertas automÃƒÂ¡ticas para que no se te pase nada.',
+                        'Alertas autom\u00e1ticas para que no se te pase nada.',
                   ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
 
                   const SizedBox(height: 20),
 
                   _BenefitItem(
                     icon: Icons.auto_awesome_rounded,
-                    title: 'PersonalizaciÃ³n premium',
-                    subtitle: 'DiseÃ±o adaptado a tu estilo de estudio.',
+                    title: 'Personalizaci\u00f3n premium',
+                    subtitle: 'Dise\u00f1o adaptado a tu estilo de estudio.',
                   ).animate().fadeIn(delay: 600.ms).slideX(begin: 0.1),
 
                   const Spacer(),
